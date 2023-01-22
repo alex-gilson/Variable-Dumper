@@ -1,5 +1,8 @@
 #include "Dumper.h"
 
+namespace VariableDumper
+{
+
 Dumper::Dumper(std::string fileName, int* audio_ptr, int dumpSize,
 	int bufferSize, int maxCount, int auPMax)
 	: fileName_(fileName)
@@ -36,3 +39,4 @@ Dumper::~Dumper()
 	outFile_.close();
 }
 
+} // namespace VariableDumper

@@ -18,6 +18,9 @@
 #define DUMP_ARRAY(a,b)
 #endif
 
+namespace VariableDumper
+{
+
 class DumperContainer
 {
 private:
@@ -49,3 +52,4 @@ public:
     }
 };
 
+} // namespace VariableDumper

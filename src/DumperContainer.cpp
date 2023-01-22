@@ -5,6 +5,9 @@
 #include <experimental/filesystem>
 #endif
 
+namespace VariableDumper
+{
+
 std::mutex dumperContainerMutex;
 
 DumperContainer::DumperContainer(std::string path)
@@ -75,3 +78,4 @@ Dumper* DumperContainer::getDumper(const std::string& name)
 	return nullptr;
 }
 
+} // namespace VariableDumper

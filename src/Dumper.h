@@ -1,7 +1,10 @@
 #pragma once
 #include <fstream>
-//#include <iomanip>
+#include <iomanip>
 #include <unordered_map>
+
+namespace VariableDumper
+{
 
 template <typename T>
 class isComplex
@@ -67,11 +70,11 @@ public:
 			{
 				if constexpr (std::is_floating_point<remove_pointer_t>::value)
 				{
-					//ss << std::setprecision(15) << buf[i] << ";";
+					ss << std::setprecision(15) << buf[i] << ";";
 				}
 				else
 				{
-					//ss << std::setprecision(15) << buf[i].r << ";";
+					ss << std::setprecision(15) << buf[i].r << ";";
 				}
 				data_ += std::move(ss.str());
 			}
@@ -79,11 +82,11 @@ public:
 			{
 				if constexpr (std::is_floating_point<remove_pointer_t>::value)
 				{
-					//outFile_ << std::setprecision(15) << buf[i] << ";";
+					outFile_ << std::setprecision(15) << buf[i] << ";";
 				}
 				else
 				{
-					//outFile_ << std::setprecision(15) << buf[i].r << ";";
+					outFile_ << std::setprecision(15) << buf[i].r << ";";
 				}
 			}
 		}
@@ -99,3 +102,4 @@ public:
 	}
 };
 
+} // namespace VariableDumper
