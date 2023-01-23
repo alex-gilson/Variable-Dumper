@@ -35,19 +35,30 @@ void DumperContainer::updatePath(const std::string& path)
 	pathMap_[std::this_thread::get_id()] = path;
 }
 
-void DumperContainer::createDumper(const std::string& name, int& audio_ptr,
-	int bufferSize, int dumpSize, int countMax, int auPMax)
+void DumperContainer::createDumper(const std::string& name, int dumpSize, int countMax, int* buffPptr, int auPMax)
 {
 	std::lock_guard<std::mutex> createDumperVarLock(writeToDumperMapMutex_);
 	std::string& folderDir = getPath();
 	std::string folderDir2 = folderDir;
-#ifdef WIN32
 	std::filesystem::create_directory(folderDir2);
-#else
-	std::experimental::filesystem::create_directory(folderDir2);
-#endif
 	std::string fileName = folderDir + name;
-	dumperMap_[fileName] = std::make_unique<Dumper>(fileName, &audio_ptr, bufferSize, dumpSize, countMax, auPMax);
+	dumperMap_[fileName] = std::make_unique<Dumper>(fileName, buffPptr, dumpSize, countMax, auPMax);
+}
+
+void DumperContainer::setDumperPrecision(const std::string& name, int precision)
+{
+	Dumper* dumper = getDumper(name);
+	if (dumper)
+	{
+		dumper->setPrecision(precision);
+	}
+}
+void DumperContainer::setDumpersPrecision(int precision)
+{
+	for (auto& dumperIt : dumperMap_)
+	{
+		dumperIt.second->setPrecision(precision);
+	}
 }
 
 void DumperContainer::destroyDumpers()

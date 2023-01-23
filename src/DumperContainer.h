@@ -8,14 +8,18 @@
 #define CREATE_DUMPER_C0NTAINER(a)      DumperContainer::getDumperContainer(a)
 #define UPDATE_DUMPER_CONTAINER_PATH(a) DumperContainer::getDumperContainer()->updatePath(a)
 #define DESTROY_DUMPERS()               DumperContainer::getDumperContainer()->destroyDumpers()
-#define INIT_DUMPER(a,b,c,d,e,f)        DumperContainer::getDumperContainer()->createDumper(a,b,c,d,e,f)
+#define INIT_DUMPER(fileName, ...)      DumperContainer::getDumperContainer()->createDumper(fileName, __VA_ARGS__)
 #define DUMP_ARRAY(a,b)                 DumperContainer::getDumperContainer()->dump(a,b)
+#define SET_DUMPER_PRECISION(a,b)       DumperContainer::getDumperContainer()->setDumperPrecision(a,b)
+#define SET_DUMPERS_PRECISION(a)        DumperContainer::getDumperContainer()->setDumpersPrecision(a)
 #else
 #define CREATE_DUMPER_C0NTAINER(a)
 #define UPDATE_DUMPER_CONTAINER_PATH(a)
 #define DESTROY_DUMPERS()
 #define INIT_DUMPER(a,b,c,d,e,f)
 #define DUMP_ARRAY(a,b)
+#define SET_DUMPER_PRECISION(a,b)
+#define SET_DUMPERS_PRECISION(a)
 #endif
 
 namespace VariableDumper
@@ -37,10 +41,11 @@ public:
     std::unordered_map<std::thread::id, std::string> pathMap_;
     static DumperContainer* getDumperContainer(const std::string& path = "");
     void updatePath(const std::string& path);
-    void createDumper(const std::string& name, int& audio_ptr, int bufferSize,
-        int dumpSize, int countMax, int auPMax);
+    void createDumper(const std::string& name, int dumpSize, int countMax = -1, int* buffPptr = nullptr, int auPMax = -1);
     Dumper* getDumper(const std::string& name);
     void destroyDumpers();
+    void setDumperPrecision(const std::string& name, int precision);
+    void setDumpersPrecision(int precision);
     template<typename T>
     void dump(T buf, const std::string& name)
     {
