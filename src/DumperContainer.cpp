@@ -1,9 +1,6 @@
 #include "DumperContainer.h"
-#ifdef WIN32
 #include <filesystem>
-#else
-#include <experimental/filesystem>
-#endif
+#include <vector>
 
 namespace VariableDumper
 {

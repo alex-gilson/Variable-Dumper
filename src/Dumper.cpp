@@ -11,8 +11,8 @@ Dumper::Dumper(std::string fileName, int* audio_ptr, int dumpSize, int maxCount,
 	, auPMax_(auPMax)
 	, count_(0)
 	, data_()
-	, precisionDigits_(15)
 	, outFile_(fileName_, std::ios::out)
+	, precisionDigits_(15)
 {
 	outFile_ << std::setprecision(precisionDigits_);
 }
