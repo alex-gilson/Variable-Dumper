@@ -35,11 +35,14 @@ void DumperContainer::updatePath(const std::string& path)
 void DumperContainer::createDumper(const std::string& name, int dumpSize, int countMax, int* buffPptr, int auPMax)
 {
 	std::lock_guard<std::mutex> createDumperVarLock(writeToDumperMapMutex_);
-	std::string& folderDir = getPath();
-	std::string folderDir2 = folderDir;
-	std::filesystem::create_directory(folderDir2);
-	std::string fileName = folderDir + name;
-	dumperMap_[fileName] = std::make_unique<Dumper>(fileName, buffPptr, dumpSize, countMax, auPMax);
+	std::string& path = getPath();
+	std::filesystem::create_directory(path);
+	std::string fileName = path + name;
+	if (!threadFileNamesMap_[std::this_thread::get_id()].insert(fileName).second)
+	{
+		throw std::runtime_error("Dumper file has already been initialized and associated to a thread.");
+	}
+	dumperFileNameMap_[fileName] = std::make_unique<Dumper>(fileName, buffPptr, dumpSize, countMax, auPMax);
 }
 
 void DumperContainer::setDumperPrecision(const std::string& name, int precision)
@@ -52,7 +55,7 @@ void DumperContainer::setDumperPrecision(const std::string& name, int precision)
 }
 void DumperContainer::setDumpersPrecision(int precision)
 {
-	for (auto& dumperIt : dumperMap_)
+	for (auto& dumperIt : dumperFileNameMap_)
 	{
 		dumperIt.second->setPrecision(precision);
 	}
@@ -61,27 +64,27 @@ void DumperContainer::setDumpersPrecision(int precision)
 void DumperContainer::destroyDumpers()
 {
 	std::lock_guard<std::mutex> destroyDumpersLock(writeToDumperMapMutex_);
-	std::vector<std::string> mapKeys;
-	for (auto& dumperIt : dumperMap_)
+	std::vector<std::string> fileNamesToErase;
+	std::set<std::string>& fileNameSetFromThread = threadFileNamesMap_[std::this_thread::get_id()];
+	for (auto& fileName : fileNameSetFromThread)
 	{
-		// Check that dumper belongs to current process.
-		if (dumperIt.first.find(getPath()) != std::string::npos)
-		{
-			mapKeys.push_back(dumperIt.first);
-		}
+		fileNamesToErase.push_back(fileName);
 	}
-	for (auto& mapKey : mapKeys)
+	for (auto& fileNameToErase : fileNamesToErase)
 	{
-		dumperMap_.erase(mapKey);
+		dumperFileNameMap_.erase(fileNameToErase);
+		fileNameSetFromThread.erase(fileNameToErase);
 	}
 }
 
 Dumper* DumperContainer::getDumper(const std::string& name)
 {
-	auto dumperIt = dumperMap_.find(getPath() + name);
-	if (dumperIt != dumperMap_.end())
+	std::set<std::string>& fileNameSetFromThread = threadFileNamesMap_[std::this_thread::get_id()];
+	std::string fileName = getPath() + name;
+	const auto& fileNameIt = fileNameSetFromThread.find(fileName);
+	if (fileNameIt != fileNameSetFromThread.end())
 	{
-		return dumperIt->second.get();
+		return dumperFileNameMap_[fileName].get();
 	}
 	return nullptr;
 }

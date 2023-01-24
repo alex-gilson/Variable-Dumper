@@ -3,6 +3,7 @@
 #include <memory>
 #include <thread>
 #include <mutex>
+#include <set>
 
 #ifndef VARIABLE_DUMPER_DISABLED
 #define CREATE_DUMPER_C0NTAINER(a)      DumperContainer::getDumperContainer(a)
@@ -30,7 +31,9 @@ class DumperContainer
 private:
     DumperContainer(std::string path);
     static DumperContainer* instance;
-    std::unordered_map<std::string, std::unique_ptr<Dumper> > dumperMap_;
+    std::unordered_map<std::string,     std::unique_ptr<Dumper>> dumperFileNameMap_;
+    std::unordered_map<std::thread::id, std::string> pathMap_;
+    std::unordered_map<std::thread::id, std::set<std::string>> threadFileNamesMap_;
     std::string& getPath();
 
     std::mutex createDumperContainerMutex_;
@@ -38,7 +41,6 @@ private:
     std::mutex updatePathMutex_;
 
 public:
-    std::unordered_map<std::thread::id, std::string> pathMap_;
     static DumperContainer* getDumperContainer(const std::string& path = "");
     void updatePath(const std::string& path);
     void createDumper(const std::string& name, int dumpSize, int countMax = -1, int* buffPptr = nullptr, int auPMax = -1);

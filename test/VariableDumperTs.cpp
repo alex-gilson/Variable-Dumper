@@ -107,6 +107,7 @@ public:
 // Test two threads
 class MultithreadDumpVariableDumperTs : public VariableDumperTs
 {
+protected:
 	void runThreadTask(const std::string path, const std::string fileName, int array[], int arraySize)
 	{
 		UPDATE_DUMPER_CONTAINER_PATH(path);
@@ -114,8 +115,8 @@ class MultithreadDumpVariableDumperTs : public VariableDumperTs
 		INIT_DUMPER(fileName, arraySize);
 		DUMP_ARRAY(array, fileName);
 
-		// Destroys only the dumpers of the path associated with this thread
-		//DESTROY_DUMPERS();
+		// Destroys only the dumpers belonging to this thread
+		DESTROY_DUMPERS();
 
 	}
 
@@ -135,7 +136,22 @@ class MultithreadDumpVariableDumperTs : public VariableDumperTs
 			t1.join();
 			t2.join();
 
-			DESTROY_DUMPERS();
+			assert(isArrayEqualToCSV(array1, arraySize, path_ + fileName1));
+			assert(isArrayEqualToCSV(array2, arraySize, path_ + fileName2));
+		}
+		// Test two threads with different paths and same fileNames
+		{
+			std::string fileName1 = "array1.csv";
+			std::string fileName2 = "array1.csv";
+
+			constexpr int arraySize = 4;
+			int array1[arraySize] = { 1, 2, 3, 4 };
+			int array2[arraySize] = { 1, 2, 3, 4 };
+
+			std::thread t1(&MultithreadDumpVariableDumperTs::runThreadTask, this, path_ + "thread_1/", fileName1, array1, arraySize);
+			std::thread t2(&MultithreadDumpVariableDumperTs::runThreadTask, this, path_ + "thread_2/", fileName2, array2, arraySize);
+			t1.join();
+			t2.join();
 
 			assert(isArrayEqualToCSV(array1, arraySize, path_ + fileName1));
 			assert(isArrayEqualToCSV(array2, arraySize, path_ + fileName2));
