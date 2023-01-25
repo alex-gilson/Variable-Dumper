@@ -126,14 +126,13 @@ class CArrayVariableDumperTs : public VariableDumperTs
 
 		INIT_DUMPER("array1.csv", size);
 		INIT_DUMPER("array2.csv", size);
-		SET_DUMPER_PRECISION("array2.csv", 12);
 		DUMP_VAR(array1_1, "array1.csv");
 		DUMP_VAR(array1_2, "array1.csv");
 		DUMP_VAR(array2, "array2.csv");
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(testArray1, filePath1));
-		assert(isArrayEqualToCSV(testArray2, filePath2, 12));
+		assert(isArrayEqualToCSV(testArray2, filePath2, 15));
 	}
 public:
 	virtual ~CArrayVariableDumperTs() {};
@@ -369,6 +368,37 @@ public:
 	virtual ~CStringsContainerVariableDumperTs() {};
 };
 
+class SetPrecisionVariableDumperTs : public VariableDumperTs
+{
+	void runTest() override
+	{
+		SET_DUMPERS_PATH(path_);
+
+		std::string filePath1 = path_ + "vec1.csv";
+
+		std::vector<std::vector<long double>> vec1 = { { 1 * pi_, 2 * pi_, 3 * pi_, 4 * pi_ } };
+
+		INIT_DUMPER("vec1.csv");
+		SET_DUMPER_PRECISION("vec1.csv", 12);
+		DUMP_VAR(vec1[0], "vec1.csv");
+		DESTROY_DUMPERS();
+
+		assert(isArrayEqualToCSV(vec1, filePath1, 12));
+
+		INIT_DUMPER("vec1.csv");
+		SET_DUMPERS_PRECISION(13);
+		DUMP_VAR(vec1[0], "vec1.csv");
+		DESTROY_DUMPERS();
+
+		assert(isArrayEqualToCSV(vec1, filePath1, 13));
+	}
+public:
+	virtual ~SetPrecisionVariableDumperTs() {};
+};
+
+// TODO
+// Test complex variables
+// Remove .csv from name
 int main()
 {
 	INIT_VARIABLE_DUMPER(VARIABLE_DUMPER_TEST_DATA_DIR);
@@ -380,5 +410,6 @@ int main()
 	ContainerDifferentSizeVariableDumperTs{}.run();
 	StringsContainerVariableDumperTs{}.run();
 	CStringsContainerVariableDumperTs{}.run();
+	SetPrecisionVariableDumperTs{}.run();
 	return false;
 }
