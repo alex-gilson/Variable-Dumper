@@ -38,11 +38,12 @@ void DumperContainer::createDumper(const std::string& name, int dumpSize, int co
 	std::string& path = getPath();
 	std::filesystem::create_directory(path);
 	std::string fileName = path + name;
-	if (!threadFileNamesMap_[std::this_thread::get_id()].insert(fileName).second)
+	if (!fileNamesSet_.insert(fileName).second)
 	{
-		throw std::runtime_error("Dumper file has already been initialized and associated to a thread.");
+		throw std::runtime_error("Dumper file has already been initialized.");
 	}
 	dumperFileNameMap_[fileName] = std::make_unique<Dumper>(fileName, buffPptr, dumpSize, countMax, auPMax);
+	threadFileNamesMap_[std::this_thread::get_id()].insert(fileName);
 }
 
 void DumperContainer::setDumperPrecision(const std::string& name, int precision)
@@ -75,6 +76,7 @@ void DumperContainer::destroyDumpers()
 	{
 		dumperFileNameMap_.erase(fileNameToErase);
 		fileNameSetFromThread.erase(fileNameToErase);
+		fileNamesSet_.erase(fileNameToErase);
 	}
 }
 

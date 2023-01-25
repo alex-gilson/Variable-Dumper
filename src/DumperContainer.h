@@ -34,6 +34,7 @@ private:
     std::unordered_map<std::string,     std::unique_ptr<Dumper>> dumperFileNameMap_;
     std::unordered_map<std::thread::id, std::string> pathMap_;
     std::unordered_map<std::thread::id, std::set<std::string>> threadFileNamesMap_;
+    std::set<std::string> fileNamesSet_;
     std::string& getPath();
 
     std::mutex createDumperContainerMutex_;
