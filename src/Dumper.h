@@ -38,10 +38,8 @@ class Dumper
 {
 
 	const std::string fileName_;
-	const int* audioPtr_;
 	const int dumpSize_;
 	const int maxCount_;
-	const int auPMax_;
 	int count_;
 	std::string data_;
 	std::ofstream outFile_;
@@ -49,7 +47,7 @@ class Dumper
 	int precisionDigits_;
 
 public:
-	Dumper(std::string fileName, int* audio_ptr, int dumpSize, int maxCount, int auPMax);
+	Dumper(std::string fileName, int dumpSize, int maxCount);
 	Dumper(Dumper& other) = delete;
 	~Dumper();
 	void setPrecision(int precision);
@@ -89,20 +87,9 @@ public:
 	{
 		using remove_pointer_t = typename std::remove_pointer<T>::type;
 
-		if (auPMax_ != -1 && !audioPtr_) { return; }
-
-		//static_assert(std::is_pointer<T>::value);
-		//static_assert(std::is_floating_point<remove_pointer_t>::value || isComplex<remove_pointer_t>::value);
-
-		if ((count_ != -1 && count_ > maxCount_ && maxCount_ != -1) ||
-			(audioPtr_ != nullptr && *audioPtr_ > auPMax_ && auPMax_ != -1)) {
-			return;
-		}
-
-		// If it's the first dump and we know the number of samples, reserve memory
-		if (storeDataAndDump_ && !count_ && auPMax_ != -1)
+		if (count_ > maxCount_ && maxCount_ != -1)
 		{
-			data_.reserve(static_cast<long long>(auPMax_) * precisionDigits_);
+			return;
 		}
 
 		if constexpr (isContainer<remove_pointer_t>::value)

@@ -3,12 +3,10 @@
 namespace VariableDumper
 {
 
-Dumper::Dumper(std::string fileName, int* audio_ptr, int dumpSize, int maxCount, int auPMax)
+Dumper::Dumper(std::string fileName, int dumpSize, int maxCount)
 	: fileName_(fileName)
-	, audioPtr_(audio_ptr)
 	, dumpSize_(dumpSize)
 	, maxCount_(maxCount)
-	, auPMax_(auPMax)
 	, count_(0)
 	, data_()
 	, outFile_(fileName_, std::ios::out)

@@ -32,7 +32,7 @@ void DumperContainer::updatePath(const std::string& path)
 	pathMap_[std::this_thread::get_id()] = path;
 }
 
-void DumperContainer::createDumper(const std::string& name, int dumpSize, int countMax, int* buffPptr, int auPMax)
+void DumperContainer::createDumper(const std::string& name, int dumpSize, int countMax)
 {
 	std::lock_guard<std::mutex> createDumperVarLock(writeToDumperMapMutex_);
 	std::string& path = getPath();
@@ -42,7 +42,7 @@ void DumperContainer::createDumper(const std::string& name, int dumpSize, int co
 	{
 		throw std::runtime_error("Dumper file has already been initialized.");
 	}
-	dumperFileNameMap_[fileName] = std::make_unique<Dumper>(fileName, buffPptr, dumpSize, countMax, auPMax);
+	dumperFileNameMap_[fileName] = std::make_unique<Dumper>(fileName, dumpSize, countMax);
 	threadFileNamesMap_[std::this_thread::get_id()].insert(fileName);
 }
 

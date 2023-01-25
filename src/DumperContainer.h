@@ -44,7 +44,7 @@ private:
 public:
     static DumperContainer* getDumperContainer(const std::string& path = "");
     void updatePath(const std::string& path);
-    void createDumper(const std::string& name, int dumpSize=-1, int countMax = -1, int* buffPptr = nullptr, int auPMax = -1);
+    void createDumper(const std::string& name, int dumpSize = -1, int countMax = -1);
     Dumper* getDumper(const std::string& name);
     void destroyDumpers();
     void setDumperPrecision(const std::string& name, int precision);
