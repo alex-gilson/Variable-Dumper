@@ -1,7 +1,9 @@
 
+#include "DumperContainer.h"
 #include <filesystem>
 #include <cassert>
-#include "DumperContainer.h"
+#include <array>
+#include <iostream>
 
 using namespace VariableDumper;
 DumperContainer* DumperContainer::instance = 0;
@@ -28,25 +30,30 @@ public:
 protected:
 	virtual void runTest() = 0;
 	template<typename T>
-	bool isArrayEqualToCSV(T* array, int size, const std::string& fileName, int precision = 12)
+	bool isArrayEqualToCSV(std::vector<std::vector<T>>& array, const std::string& fileName, int precision = 12)
 	{
 		std::ifstream file(fileName);
 		std::string line, cell;
-		int index = 0;
+		int index1 = 0;
 		char delim1 = '\n';
 		char delim2 = ';';
 		while (getline(file, line, delim1))
 		{
-			if (index >= size)
+			int index2 = 0;
+			if (index1 >= array.size())
 			{
 				return false;
 			}
 			std::stringstream lineStream(line);
 			while (getline(lineStream, cell, delim2))
 			{
+				if (index2 >= array[index1].size())
+				{
+					return false;
+				}
 				if (std::is_integral<T>::value)
 				{
-					if (stoi(cell) != array[index])
+					if (stoi(cell) != array[index1][index2])
 					{
 						return false;
 					}
@@ -55,16 +62,21 @@ protected:
 				{
 					std::stringstream ss;
 					ss.precision(precision);
-					ss << array[index];
+					ss << array[index1][index2];
 					if (cell != ss.str())
 					{
 						return false;
 					}
 				}
-				index++;
+				index2++;
 			}
+			if (index2 != array[index1].size())
+			{
+				return false;
+			}
+			index1++;
 		}
-		if (index != size)
+		if (index1 != array.size())
 		{
 			return false;
 		}
@@ -74,98 +86,259 @@ protected:
 	const long double pi_ = 3.141592653589793238;
 };
 
-// Test one thread, one array of ints, one array of doubles
-class OneThreadArrayDumpVariableDumperTs : public VariableDumperTs
+class CArrayVariableDumperTs : public VariableDumperTs
 {
 	void runTest() override
 	{
-		UPDATE_DUMPER_CONTAINER_PATH(path_);
+		SET_DUMPERS_PATH(path_);
 
 		std::string filePath1 = path_ + "array1.csv";
 		std::string filePath2 = path_ + "array2.csv";
-		constexpr int arraySize  = 4;
-		int array1_1[arraySize] = { 1, 2, 3, 4 };
-		int array1_2[arraySize] = { 5, 6, 7, 8 };
-		int array1[arraySize*2] = { 1, 2, 3, 4, 5, 6, 7, 8 };
-		long double array2[arraySize] = { 1*pi_, 2*pi_, 3*pi_, 4*pi_ };
+		constexpr int size  = 4;
 
-		INIT_DUMPER("array1.csv", arraySize);
-		INIT_DUMPER("array2.csv", arraySize);
+		int array1_1[size] = { 1, 2, 3, 4 };
+		int array1_2[size] = { 5, 6, 7, 8 };
+		long double array2[size] = { 1*pi_, 2*pi_, 3*pi_, 4*pi_ };
+
+		std::vector<std::vector<int>> testArray1;
+		testArray1.push_back(std::vector<int>{&array1_1[0], &array1_1[0] + size });
+		testArray1.push_back(std::vector<int>{&array1_2[0], &array1_2[0] + size });
+
+		std::vector<std::vector<long double>> testArray2;
+		testArray2.push_back(std::vector<long double>{&array2[0], &array2[0] + size });
+
+		INIT_DUMPER("array1.csv", size);
+		INIT_DUMPER("array2.csv", size);
 		SET_DUMPER_PRECISION("array2.csv", 12);
-		DUMP_ARRAY(array1_1, "array1.csv");
-		DUMP_ARRAY(array1_2, "array1.csv");
-		DUMP_ARRAY(array2, "array2.csv");
+		DUMP_VAR(array1_1, "array1.csv");
+		DUMP_VAR(array1_2, "array1.csv");
+		DUMP_VAR(array2, "array2.csv");
 		DESTROY_DUMPERS();
 
-		assert(isArrayEqualToCSV(array1, arraySize*2, filePath1));
-		assert(isArrayEqualToCSV(array2, arraySize, filePath2, 12));
+		assert(isArrayEqualToCSV(testArray1, filePath1));
+		assert(isArrayEqualToCSV(testArray2, filePath2, 12));
 	}
 public:
-	virtual ~OneThreadArrayDumpVariableDumperTs() {};
+	virtual ~CArrayVariableDumperTs() {};
 };
 
-// Test two threads
-class MultithreadDumpVariableDumperTs : public VariableDumperTs
+class MultithreadVariableDumperTs : public VariableDumperTs
+{
+public:
+	void runThreadTask(const std::string path, const std::string fileName, int array[], int size)
+	{
+		// Sets the path of the dumpers associated to this thread
+		SET_DUMPERS_PATH(path);
+
+		INIT_DUMPER(fileName, size);
+		DUMP_VAR(array, fileName);
+
+		// Destroys the dumpers associated to this thread
+		DESTROY_DUMPERS();
+	}
+public:
+	virtual ~MultithreadVariableDumperTs() {};
+};
+
+class MultithreadSamePathVariableDumperTs : public MultithreadVariableDumperTs
 {
 protected:
-	void runThreadTask(const std::string path, const std::string fileName, int array[], int arraySize)
-	{
-		UPDATE_DUMPER_CONTAINER_PATH(path);
-
-		INIT_DUMPER(fileName, arraySize);
-		DUMP_ARRAY(array, fileName);
-
-		// Destroys only the dumpers belonging to this thread
-		DESTROY_DUMPERS();
-
-	}
-
 	void runTest() override
 	{
-		// Test two threads with the same path
-		{
-			std::string fileName1 = "array1.csv";
-			std::string fileName2 = "array2.csv";
+		std::string fileName1 = "array1.csv";
+		std::string fileName2 = "array2.csv";
 
-			constexpr int arraySize = 4;
-			int array1[arraySize] = { 1, 2, 3, 4 };
-			int array2[arraySize] = { 1, 2, 3, 4 };
+		constexpr int size = 4;
+		int array1[size] = { 1, 2, 3, 4 };
+		int array2[size] = { 1, 2, 3, 4 };
 
-			std::thread t1(&MultithreadDumpVariableDumperTs::runThreadTask, this, path_, fileName1, array1, arraySize);
-			std::thread t2(&MultithreadDumpVariableDumperTs::runThreadTask, this, path_, fileName2, array2, arraySize);
-			t1.join();
-			t2.join();
+		std::vector<std::vector<int>> testArray1, testArray2;
+		testArray1.push_back(std::vector<int>{&array1[0], &array1[0] + size });
+		testArray2.push_back(std::vector<int>{&array2[0], &array2[0] + size });
 
-			assert(isArrayEqualToCSV(array1, arraySize, path_ + fileName1));
-			assert(isArrayEqualToCSV(array2, arraySize, path_ + fileName2));
-		}
-		// Test two threads with different paths and same fileNames
-		{
-			std::string fileName1 = "array1.csv";
-			std::string fileName2 = "array1.csv";
+		std::thread t1(&MultithreadSamePathVariableDumperTs::runThreadTask, this, path_, fileName1, array1, size);
+		std::thread t2(&MultithreadSamePathVariableDumperTs::runThreadTask, this, path_, fileName2, array2, size);
+		t1.join();
+		t2.join();
 
-			constexpr int arraySize = 4;
-			int array1[arraySize] = { 1, 2, 3, 4 };
-			int array2[arraySize] = { 1, 2, 3, 4 };
-
-			std::thread t1(&MultithreadDumpVariableDumperTs::runThreadTask, this, path_ + "thread_1/", fileName1, array1, arraySize);
-			std::thread t2(&MultithreadDumpVariableDumperTs::runThreadTask, this, path_ + "thread_2/", fileName2, array2, arraySize);
-			t1.join();
-			t2.join();
-
-			assert(isArrayEqualToCSV(array1, arraySize, path_ + fileName1));
-			assert(isArrayEqualToCSV(array2, arraySize, path_ + fileName2));
-		}
+		assert(isArrayEqualToCSV(testArray1, path_ + fileName1));
+		assert(isArrayEqualToCSV(testArray2, path_ + fileName2));
 	}
-
 public:
-	virtual ~MultithreadDumpVariableDumperTs() {};
+	virtual ~MultithreadSamePathVariableDumperTs() {};
+};
+
+class MultithreadDifferentPathVariableDumperTs : public MultithreadVariableDumperTs
+{
+protected:
+	void runTest() override
+	{
+		std::string fileName1 = "array1.csv";
+		std::string fileName2 = "array1.csv";
+		std::string path1 = path_ + "thread_1/";
+		std::string path2 = path_ + "thread_2/";
+
+		constexpr int size = 4;
+		int array1[size] = { 1, 2, 3, 4 };
+		int array2[size] = { 1, 2, 3, 4 };
+
+		std::vector<std::vector<int>> testArray1, testArray2;
+		testArray1.push_back(std::vector<int>{&array1[0], &array1[0] + size });
+		testArray2.push_back(std::vector<int>{&array2[0], &array2[0] + size });
+
+		std::thread t1(&MultithreadDifferentPathVariableDumperTs::runThreadTask, this, path1, fileName1, array1, size);
+		std::thread t2(&MultithreadDifferentPathVariableDumperTs::runThreadTask, this, path2, fileName2, array2, size);
+		t1.join();
+		t2.join();
+
+		assert(isArrayEqualToCSV(testArray1, path1 + fileName1));
+		assert(isArrayEqualToCSV(testArray2, path2 + fileName2));
+	}
+public:
+	virtual ~MultithreadDifferentPathVariableDumperTs() {};
+};
+
+class BasicContainerVariableDumperTs : public VariableDumperTs
+{
+	void runTest() override
+	{
+		SET_DUMPERS_PATH(path_);
+
+		std::string filePath1 = path_ + "vec.csv";
+		std::string filePath2 = path_ + "array.csv";
+
+		constexpr int size = 4;
+		std::vector<std::vector<int>> vec = { { 1, 2, 3, 4}, {5, 6, 7, 8 } };
+		std::array<int, size> array = { 1, 2, 3, 4 };
+		std::vector<std::vector<int>> testArray;
+		testArray.push_back(std::vector<int>(array.begin(), array.end()));
+
+		INIT_DUMPER("vec.csv");
+		INIT_DUMPER("array.csv");
+		DUMP_VAR(vec[0], "vec.csv");
+		DUMP_VAR(vec[1], "vec.csv");
+		DUMP_VAR(array, "array.csv");
+		DESTROY_DUMPERS();
+
+		assert(isArrayEqualToCSV(vec, filePath1));
+		assert(isArrayEqualToCSV(testArray, filePath2));
+	}
+public:
+	virtual ~BasicContainerVariableDumperTs() {};
+};
+
+class NoCopyCustomContainerVariableDumperTs : public VariableDumperTs
+{
+	// Custom container to test that no copies are made when dumping
+	class testingContainer
+	{
+		std::vector<int> data_;
+	public:
+		explicit testingContainer(const std::vector<int>& vec)
+		{
+			data_ = vec;
+		};
+		testingContainer(const testingContainer& other)
+		{
+			// This container should not be copied
+			assert(false);
+			data_ = other.data_;
+		}
+		size_t size()
+		{
+			return data_.size();
+		}
+		int& operator[](const int idx)
+		{
+			return data_[idx];
+		}
+		int* data()
+		{
+			return data_.data();
+		}
+		class iterator
+		{
+		private:
+			std::vector<int>::iterator ptr;
+
+		public:
+			iterator(std::vector<int>::iterator p) : ptr(p) {}
+			iterator operator++() { ptr++; return *this; }
+			bool operator!=(const iterator& other) const { return ptr != other.ptr; }
+			int& operator*() { return *ptr; }
+		};
+		iterator begin() { return iterator(data_.begin()); }
+		iterator end() { return iterator(data_.end()); }
+	};
+	void runTest() override
+	{
+		SET_DUMPERS_PATH(path_);
+
+		std::string filePath1 = path_ + "cont.csv";
+
+		std::vector<std::vector<int>>  vec1 = { { 1, 2, 3, 4 } };
+		testingContainer cont(vec1[0]);
+
+		INIT_DUMPER("cont.csv");
+		DUMP_VAR(cont, "cont.csv");
+		DESTROY_DUMPERS();
+
+		assert(isArrayEqualToCSV(vec1, filePath1));
+	}
+public:
+	virtual ~NoCopyCustomContainerVariableDumperTs() {};
+};
+
+class ContainerDifferentSizeVariableDumperTs : public VariableDumperTs
+{
+	void runTest() override
+	{
+		SET_DUMPERS_PATH(path_);
+
+		std::string filePath1 = path_ + "vec.csv";
+
+		std::vector<std::vector<int>> vec = { { 1, 2, 3, 4}, {5, 6, 7, 8, 9, 10, 11, 12 } };
+
+		INIT_DUMPER("vec.csv");
+		DUMP_VAR(vec[0], "vec.csv");
+		DUMP_VAR(vec[1], "vec.csv");
+		DESTROY_DUMPERS();
+
+		assert(isArrayEqualToCSV(vec, filePath1));
+	}
+public:
+	virtual ~ContainerDifferentSizeVariableDumperTs() {};
+};
+
+class StringsContainerVariableDumperTs : public VariableDumperTs
+{
+	void runTest() override
+	{
+		SET_DUMPERS_PATH(path_);
+
+		std::string filePath1 = path_ + "vec.csv";
+
+		std::vector<std::vector<int>> vec = { { 1, 2, 3, 4}, {5, 6, 7, 8, 9, 10, 11, 12 } };
+
+		INIT_DUMPER("vec.csv");
+		DUMP_VAR(vec[0], "vec.csv");
+		DUMP_VAR(vec[1], "vec.csv");
+		DESTROY_DUMPERS();
+
+		assert(isArrayEqualToCSV(vec, filePath1));
+	}
+public:
+	virtual ~StringsContainerVariableDumperTs() {};
 };
 
 int main()
 {
-	CREATE_DUMPER_C0NTAINER(VARIABLE_DUMPER_TEST_DATA_DIR);
-	OneThreadArrayDumpVariableDumperTs{}.run();
-	MultithreadDumpVariableDumperTs{}.run();
+	INIT_VARIABLE_DUMPER(VARIABLE_DUMPER_TEST_DATA_DIR);
+	CArrayVariableDumperTs{}.run();
+	MultithreadSamePathVariableDumperTs{}.run();
+	MultithreadDifferentPathVariableDumperTs{}.run();
+	BasicContainerVariableDumperTs{}.run();
+	NoCopyCustomContainerVariableDumperTs{}.run();
+	ContainerDifferentSizeVariableDumperTs{}.run();
 	return false;
 }

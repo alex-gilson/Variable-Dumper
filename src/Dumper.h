@@ -20,8 +20,23 @@ public:
 	enum { value = sizeof(test<T>(0)) == sizeof(YesType) };
 };
 
+template <typename T>
+class isContainer
+{
+private:
+	typedef char YesType[1];
+	typedef char NoType[2];
+
+	template <typename C> static YesType& test(decltype(&C::size));
+	template <typename C> static NoType& test(...);
+
+public:
+	enum { value = sizeof(test<T>(0)) == sizeof(YesType) };
+};
+
 class Dumper
 {
+
 	const std::string fileName_;
 	const int* audioPtr_;
 	const int dumpSize_;
@@ -38,14 +53,45 @@ public:
 	Dumper(Dumper& other) = delete;
 	~Dumper();
 	void setPrecision(int precision);
+	template<typename T>
+	void dumpVal(T& val)
+	{
+		using remove_pointer_t = typename std::remove_pointer<T>::type;
+		std::stringstream ss;
+		ss.precision(precisionDigits_);
+		if (storeDataAndDump_)
+		{
+			if constexpr (isComplex<remove_pointer_t>::value)
+			{
+				ss << val.r << ";";
+			}
+			else
+			{
+				ss << val << ";";
+			}
+			data_ += std::move(ss.str());
+		}
+		else
+		{
+			if constexpr (isComplex<remove_pointer_t>::value)
+			{
+				outFile_ << val.r << ";";
+			}
+			else
+			{
+				outFile_ << val << ";";
+			}
+		}
+	}
 	// Default dumper
 	template<typename T>
-	void dump(T buf)
+	void dump(T& buf)
 	{
-		if (auPMax_ != -1 && !audioPtr_) { return; }
 		using remove_pointer_t = typename std::remove_pointer<T>::type;
 
-		static_assert(std::is_pointer<T>::value);
+		if (auPMax_ != -1 && !audioPtr_) { return; }
+
+		//static_assert(std::is_pointer<T>::value);
 		//static_assert(std::is_floating_point<remove_pointer_t>::value || isComplex<remove_pointer_t>::value);
 
 		if ((count_ != -1 && count_ > maxCount_ && maxCount_ != -1) ||
@@ -59,33 +105,24 @@ public:
 			data_.reserve(static_cast<long long>(auPMax_) * precisionDigits_);
 		}
 
-		// Store in a format understandable by numpy in python
-		for (int i = 0; i < dumpSize_; i++)
+		if constexpr (isContainer<remove_pointer_t>::value)
 		{
-			std::stringstream ss;
-			ss.precision(precisionDigits_);
-			if (storeDataAndDump_)
+			int i = 0;
+			for (auto& val : buf)
 			{
-				if constexpr (isComplex<remove_pointer_t>::value)
+				if (!(dumpSize_ == -1 || i < dumpSize_))
 				{
-					ss << buf[i].r << ";";
+					break;
 				}
-				else
-				{
-					ss << buf[i] << ";";
-				}
-				data_ += std::move(ss.str());
+				dumpVal(val);
+				i++;
 			}
-			else
+		}
+		else
+		{
+			for (int i = 0; i < dumpSize_; i++)
 			{
-				if constexpr (isComplex<remove_pointer_t>::value)
-				{
-					outFile_ << buf[i].r << ";";
-				}
-				else
-				{
-					outFile_ << buf[i] << ";";
-				}
+				dumpVal(buf[i]);
 			}
 		}
 		if (storeDataAndDump_)

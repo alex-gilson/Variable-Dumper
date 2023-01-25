@@ -6,19 +6,19 @@
 #include <set>
 
 #ifndef VARIABLE_DUMPER_DISABLED
-#define CREATE_DUMPER_C0NTAINER(a)      DumperContainer::getDumperContainer(a)
-#define UPDATE_DUMPER_CONTAINER_PATH(a) DumperContainer::getDumperContainer()->updatePath(a)
+#define INIT_VARIABLE_DUMPER(a)         DumperContainer::getDumperContainer(a)
+#define SET_DUMPERS_PATH(a)             DumperContainer::getDumperContainer()->updatePath(a)
 #define DESTROY_DUMPERS()               DumperContainer::getDumperContainer()->destroyDumpers()
 #define INIT_DUMPER(fileName, ...)      DumperContainer::getDumperContainer()->createDumper(fileName, __VA_ARGS__)
-#define DUMP_ARRAY(a,b)                 DumperContainer::getDumperContainer()->dump(a,b)
+#define DUMP_VAR(a,b)                   DumperContainer::getDumperContainer()->dump(a,b)
 #define SET_DUMPER_PRECISION(a,b)       DumperContainer::getDumperContainer()->setDumperPrecision(a,b)
 #define SET_DUMPERS_PRECISION(a)        DumperContainer::getDumperContainer()->setDumpersPrecision(a)
 #else
-#define CREATE_DUMPER_C0NTAINER(a)
-#define UPDATE_DUMPER_CONTAINER_PATH(a)
+#define INIT_VARIABLE_DUMPER(a)
+#define SET_DUMPERS_PATH(a)
 #define DESTROY_DUMPERS()
 #define INIT_DUMPER(a,b,c,d,e,f)
-#define DUMP_ARRAY(a,b)
+#define DUMP_VAR(a,b)
 #define SET_DUMPER_PRECISION(a,b)
 #define SET_DUMPERS_PRECISION(a)
 #endif
@@ -43,13 +43,13 @@ private:
 public:
     static DumperContainer* getDumperContainer(const std::string& path = "");
     void updatePath(const std::string& path);
-    void createDumper(const std::string& name, int dumpSize, int countMax = -1, int* buffPptr = nullptr, int auPMax = -1);
+    void createDumper(const std::string& name, int dumpSize=-1, int countMax = -1, int* buffPptr = nullptr, int auPMax = -1);
     Dumper* getDumper(const std::string& name);
     void destroyDumpers();
     void setDumperPrecision(const std::string& name, int precision);
     void setDumpersPrecision(int precision);
     template<typename T>
-    void dump(T buf, const std::string& name)
+    void dump(T& buf, const std::string& name)
     {
         Dumper* dumper = getDumper(name);
         if (dumper)
