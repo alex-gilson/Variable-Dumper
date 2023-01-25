@@ -41,9 +41,7 @@ class Dumper
 	const int dumpSize_;
 	const int maxCount_;
 	int count_;
-	std::string data_;
 	std::ofstream outFile_;
-	const bool storeDataAndDump_ = false;
 	int precisionDigits_;
 
 public:
@@ -55,30 +53,13 @@ public:
 	void dumpVal(T& val)
 	{
 		using remove_pointer_t = typename std::remove_pointer<T>::type;
-		std::stringstream ss;
-		ss.precision(precisionDigits_);
-		if (storeDataAndDump_)
+		if constexpr (isComplex<remove_pointer_t>::value)
 		{
-			if constexpr (isComplex<remove_pointer_t>::value)
-			{
-				ss << val.r << ";";
-			}
-			else
-			{
-				ss << val << ";";
-			}
-			data_ += std::move(ss.str());
+			outFile_ << val.r << ";";
 		}
 		else
 		{
-			if constexpr (isComplex<remove_pointer_t>::value)
-			{
-				outFile_ << val.r << ";";
-			}
-			else
-			{
-				outFile_ << val << ";";
-			}
+			outFile_ << val << ";";
 		}
 	}
 	// Default dumper
@@ -112,14 +93,7 @@ public:
 				dumpVal(buf[i]);
 			}
 		}
-		if (storeDataAndDump_)
-		{
-			data_ += "\n";
-		}
-		else
-		{
-			outFile_ << "\n";
-		}
+		outFile_ << "\n";
 		count_++;
 	}
 };

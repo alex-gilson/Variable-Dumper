@@ -8,7 +8,6 @@ Dumper::Dumper(std::string fileName, int dumpSize, int maxCount)
 	, dumpSize_(dumpSize)
 	, maxCount_(maxCount)
 	, count_(0)
-	, data_()
 	, outFile_(fileName_, std::ios::out)
 	, precisionDigits_(15)
 {
@@ -23,10 +22,6 @@ void Dumper::setPrecision(int precision)
 
 Dumper::~Dumper()
 {
-	if (storeDataAndDump_)
-	{
-		outFile_ << data_;
-	}
 	outFile_.close();
 }
 
