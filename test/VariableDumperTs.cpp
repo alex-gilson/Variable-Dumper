@@ -51,19 +51,33 @@ protected:
 				{
 					return false;
 				}
-				if (std::is_integral<T>::value)
+				if constexpr (std::is_integral<T>::value)
 				{
 					if (stoi(cell) != array[index1][index2])
 					{
 						return false;
 					}
 				}
-				else if (std::is_floating_point<T>::value)
+				else if constexpr (std::is_floating_point<T>::value)
 				{
 					std::stringstream ss;
 					ss.precision(precision);
 					ss << array[index1][index2];
 					if (cell != ss.str())
+					{
+						return false;
+					}
+				}
+				else if constexpr(std::is_same_v<T, std::string>)
+				{
+					if (cell != array[index1][index2])
+					{
+						return false;
+					}
+				}
+				else if constexpr(std::is_same_v<T, const char*>)
+				{
+					if (strcmp(cell.c_str(), array[index1][index2]))
 					{
 						return false;
 					}
@@ -316,19 +330,40 @@ class StringsContainerVariableDumperTs : public VariableDumperTs
 	{
 		SET_DUMPERS_PATH(path_);
 
-		std::string filePath1 = path_ + "vec.csv";
+		std::string filePath1 = path_ + "strings.csv";
 
-		std::vector<std::vector<int>> vec = { { 1, 2, 3, 4}, {5, 6, 7, 8, 9, 10, 11, 12 } };
+		std::vector<std::vector<std::string>> strings = { { "This ", "is", " a", " test."}, {"This ", "is", " also ", "a ", "test ", "of ", "different", "length", "."}};
 
-		INIT_DUMPER("vec.csv");
-		DUMP_VAR(vec[0], "vec.csv");
-		DUMP_VAR(vec[1], "vec.csv");
+		INIT_DUMPER("strings.csv");
+		DUMP_VAR(strings[0], "strings.csv");
+		DUMP_VAR(strings[1], "strings.csv");
 		DESTROY_DUMPERS();
 
-		assert(isArrayEqualToCSV(vec, filePath1));
+		assert(isArrayEqualToCSV(strings, filePath1));
 	}
 public:
 	virtual ~StringsContainerVariableDumperTs() {};
+};
+
+class CStringsContainerVariableDumperTs : public VariableDumperTs
+{
+	void runTest() override
+	{
+		SET_DUMPERS_PATH(path_);
+
+		std::string filePath1 = path_ + "strings.csv";
+
+		std::vector<std::vector<const char*>> strings = { { "This ", "is", " a", " test."}, {"This ", "is", " also ", "a ", "test ", "of ", "different", "length", "."}};
+
+		INIT_DUMPER("strings.csv");
+		DUMP_VAR(strings[0], "strings.csv");
+		DUMP_VAR(strings[1], "strings.csv");
+		DESTROY_DUMPERS();
+
+		assert(isArrayEqualToCSV(strings, filePath1));
+	}
+public:
+	virtual ~CStringsContainerVariableDumperTs() {};
 };
 
 int main()
@@ -340,5 +375,7 @@ int main()
 	BasicContainerVariableDumperTs{}.run();
 	NoCopyCustomContainerVariableDumperTs{}.run();
 	ContainerDifferentSizeVariableDumperTs{}.run();
+	StringsContainerVariableDumperTs{}.run();
+	CStringsContainerVariableDumperTs{}.run();
 	return false;
 }
