@@ -21,11 +21,14 @@ public:
 	{
 		std::filesystem::remove_all(path_);
 	}
-	virtual void run()
+	virtual void run(int numRuns = 1)
 	{
-		setup();
-		runTest();
-		teardown();
+		for (int i = 0; i < numRuns; i++)
+		{
+			setup();
+			runTest();
+			teardown();
+		}
 	}
 protected:
 	virtual void runTest() = 0;
@@ -370,8 +373,8 @@ int main()
 {
 	INIT_VARIABLE_DUMPER(VARIABLE_DUMPER_TEST_DATA_DIR);
 	CArrayVariableDumperTs{}.run();
-	MultithreadSamePathVariableDumperTs{}.run();
-	MultithreadDifferentPathVariableDumperTs{}.run();
+	MultithreadSamePathVariableDumperTs{}.run(100);
+	MultithreadDifferentPathVariableDumperTs{}.run(100);
 	BasicContainerVariableDumperTs{}.run();
 	NoCopyCustomContainerVariableDumperTs{}.run();
 	ContainerDifferentSizeVariableDumperTs{}.run();
