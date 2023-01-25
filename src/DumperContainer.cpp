@@ -57,9 +57,9 @@ void DumperContainer::setDumperPrecision(const std::string& name, int precision)
 
 void DumperContainer::setDumpersPrecision(int precision)
 {
-	for (auto& dumperIt : dumperFileNameMap_)
+	for (auto& fileName : fileNamesSet_)
 	{
-		dumperIt.second->setPrecision(precision);
+		dumperFileNameMap_.at(fileName)->setPrecision(precision);
 	}
 }
 
