@@ -68,7 +68,7 @@ public:
 	{
 		using remove_pointer_t = typename std::remove_pointer<T>::type;
 
-		if (count_ > maxCount_ && maxCount_ != -1)
+		if (count_ >= maxCount_ && maxCount_ != -1)
 		{
 			return;
 		}

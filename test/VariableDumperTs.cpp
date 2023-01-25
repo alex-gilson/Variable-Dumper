@@ -396,9 +396,50 @@ public:
 	virtual ~SetPrecisionVariableDumperTs() {};
 };
 
-// TODO
-// Test complex variables
-// Remove .csv from name
+class MaxCountVariableDumperTs : public VariableDumperTs
+{
+	void runTest() override
+	{
+		SET_DUMPERS_PATH(path_);
+
+		std::string filePath1 = path_ + "vec.csv";
+
+		std::vector<std::vector<int>> vec = { { 1, 2, 3, 4}, {5, 6, 7, 8 } };
+		std::vector<std::vector<int>> testVec = { { 1, 2, 3, 4} };
+
+		INIT_DUMPER("vec.csv", -1, 1);
+		DUMP_VAR(vec[0], "vec.csv");
+		DUMP_VAR(vec[1], "vec.csv");
+		DESTROY_DUMPERS();
+
+		assert(isArrayEqualToCSV(testVec, filePath1));
+	}
+public:
+	virtual ~MaxCountVariableDumperTs() {};
+};
+
+class DumpSizeVariableDumperTs : public VariableDumperTs
+{
+	void runTest() override
+	{
+		SET_DUMPERS_PATH(path_);
+
+		std::string filePath1 = path_ + "vec.csv";
+
+		std::vector<std::vector<int>> vec = { { 1, 2, 3, 4}, {5, 6, 7, 8 } };
+		std::vector<std::vector<int>> testVec = { { 1, 2, 3}, {5, 6, 7 } };
+
+		INIT_DUMPER("vec.csv", 3);
+		DUMP_VAR(vec[0], "vec.csv");
+		DUMP_VAR(vec[1], "vec.csv");
+		DESTROY_DUMPERS();
+
+		assert(isArrayEqualToCSV(testVec, filePath1));
+	}
+public:
+	virtual ~DumpSizeVariableDumperTs() {};
+};
+
 int main()
 {
 	INIT_VARIABLE_DUMPER(VARIABLE_DUMPER_TEST_DATA_DIR);
@@ -411,5 +452,7 @@ int main()
 	StringsContainerVariableDumperTs{}.run();
 	CStringsContainerVariableDumperTs{}.run();
 	SetPrecisionVariableDumperTs{}.run();
+	MaxCountVariableDumperTs{}.run();
+	DumpSizeVariableDumperTs{}.run();
 	return false;
 }
