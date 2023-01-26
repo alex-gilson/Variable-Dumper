@@ -33,7 +33,7 @@ void DumperManager::updatePath(const std::string& path)
 	pathMap_[std::this_thread::get_id()] = path;
 }
 
-void DumperManager::createDumper(const std::string& name, int dumpSize, int countMax)
+Dumper* DumperManager::createDumper(const std::string& name)
 {
 	std::lock_guard<std::mutex> createDumperVarLock(writeToDumperMapMutex_);
 	std::string& path = getPath();
@@ -46,8 +46,9 @@ void DumperManager::createDumper(const std::string& name, int dumpSize, int coun
 	{
 		throw std::runtime_error("Dumper file has already been initialized.");
 	}
-	dumperFileNameMap_[fullName] = std::make_unique<Dumper>(fullName, dumpSize, countMax);
+	dumperFileNameMap_[fullName] = std::make_unique<Dumper>(fullName, defaultPrecision_, defaultCsvValueDelimiter_, defaultCsvLineDelimiter_);
 	threadFileNamesMap_[std::this_thread::get_id()].insert(fullName);
+	return dumperFileNameMap_[fullName].get();
 }
 
 void DumperManager::setDumperPrecision(const std::string& name, int precision)
@@ -61,6 +62,7 @@ void DumperManager::setDumperPrecision(const std::string& name, int precision)
 
 void DumperManager::setDumpersPrecision(int precision)
 {
+	defaultPrecision_ = precision;
 	for (auto& fileName : fileNamesSet_)
 	{
 		dumperFileNameMap_.at(fileName)->setPrecision(precision);
@@ -69,6 +71,8 @@ void DumperManager::setDumpersPrecision(int precision)
 
 void DumperManager::setDumpersCSVDelimiters(char valueDelimiter, char lineDelimiter)
 {
+	defaultCsvValueDelimiter_ = valueDelimiter;
+	defaultCsvLineDelimiter_  = lineDelimiter;
 	for (auto& fileName : fileNamesSet_)
 	{
 		dumperFileNameMap_.at(fileName)->setCSVDelimiters(valueDelimiter, lineDelimiter);
@@ -81,6 +85,15 @@ void DumperManager::setDumperCSVDelimiters(const std::string& name, char valueDe
 	if (dumper)
 	{
 		dumper->setCSVDelimiters(valueDelimiter, lineDelimiter);
+	}
+}
+
+void DumperManager::setDumperMaxDumps(const std::string& name, int maxDumps)
+{
+	Dumper* dumper = getDumper(name);
+	if (dumper)
+	{
+		dumper->setMaxDumps(maxDumps);
 	}
 }
 
@@ -104,13 +117,13 @@ void DumperManager::destroyDumpers()
 Dumper* DumperManager::getDumper(const std::string& name)
 {
 	std::set<std::string>& fileNameSetFromThread = threadFileNamesMap_[std::this_thread::get_id()];
-	std::string fileName = getPath() + name;
-	const auto& fileNameIt = fileNameSetFromThread.find(fileName);
+	std::string fullName = getPath() + name;
+	const auto& fileNameIt = fileNameSetFromThread.find(fullName);
 	if (fileNameIt != fileNameSetFromThread.end())
 	{
-		return dumperFileNameMap_[fileName].get();
+		return dumperFileNameMap_[fullName].get();
 	}
-	return nullptr;
+	return createDumper(name);
 }
 
 } // namespace VariableDumper

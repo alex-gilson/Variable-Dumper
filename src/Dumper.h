@@ -30,8 +30,7 @@ class Dumper
 	};
 
 	const std::string name_;
-	const int dumpSize_;
-	const int maxCount_;
+	int maxDumps_;
 	int count_;
 	std::ofstream outFile_;
 	int precisionDigits_;
@@ -39,11 +38,12 @@ class Dumper
 	char lineDelimiter_;
 
 public:
-	Dumper(std::string name, int dumpSize, int maxCount);
+	Dumper(std::string name, int precision, char valueDelimiter, char lineDelimiter);
 	Dumper(Dumper& other) = delete;
 	~Dumper();
 	void setPrecision(int precision);
 	void setCSVDelimiters(char valueDelimiter, char lineDelimiter);
+	void setMaxDumps(int maxDumps);
 	template<typename T>
 	void dumpVal(T& val)
 	{
@@ -58,11 +58,11 @@ public:
 	}
 	// Default dumper
 	template<typename T>
-	void dump(T& buf)
+	void dump(T& buf, int dumpSize)
 	{
 		using remove_pointer_t = typename std::remove_pointer<T>::type;
 
-		if (count_ >= maxCount_ && maxCount_ != -1)
+		if (count_ >= maxDumps_ && maxDumps_ != -1)
 		{
 			return;
 		}
@@ -72,7 +72,7 @@ public:
 			int i = 0;
 			for (auto& val : buf)
 			{
-				if (!(dumpSize_ == -1 || i < dumpSize_))
+				if (!(dumpSize == -1 || i < dumpSize))
 				{
 					break;
 				}
@@ -82,7 +82,7 @@ public:
 		}
 		else
 		{
-			for (int i = 0; i < dumpSize_; i++)
+			for (int i = 0; i < dumpSize; i++)
 			{
 				dumpVal(buf[i]);
 			}

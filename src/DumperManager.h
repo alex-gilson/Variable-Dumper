@@ -8,17 +8,16 @@
 #ifndef VARIABLE_DUMPER_DISABLED
 #define SET_DUMPERS_PATH(a)              VariableDumper::DumperManager::getDumperManager()->updatePath(a)
 #define DESTROY_DUMPERS()                VariableDumper::DumperManager::getDumperManager()->destroyDumpers()
-#define INIT_DUMPER(fileName, ...)       VariableDumper::DumperManager::getDumperManager()->createDumper(fileName, __VA_ARGS__)
-#define DUMP_VAR(a,b)                    VariableDumper::DumperManager::getDumperManager()->dump(a,b)
+#define DUMP_VAR(...)                    VariableDumper::DumperManager::getDumperManager()->dump(__VA_ARGS__)
 #define SET_DUMPER_PRECISION(a,b)        VariableDumper::DumperManager::getDumperManager()->setDumperPrecision(a,b)
 #define SET_DUMPERS_PRECISION(a)         VariableDumper::DumperManager::getDumperManager()->setDumpersPrecision(a)
 #define SET_DUMPER_CSV_DELIMITERS(a,b,c) VariableDumper::DumperManager::getDumperManager()->setDumperCSVDelimiters(a,b,c)
 #define SET_DUMPERS_CSV_DELIMITERS(a,b)  VariableDumper::DumperManager::getDumperManager()->setDumpersCSVDelimiters(a,b)
+#define SET_DUMPER_MAX_DUMPS(a,b)        VariableDumper::DumperManager::getDumperManager()->setDumperMaxDumps(a,b)
 #else
 #define SET_DUMPERS_PATH(a)
 #define DESTROY_DUMPERS()
-#define INIT_DUMPER(a,b,c,d,e,f)
-#define DUMP_VAR(a,b)
+#define DUMP_VAR(...)
 #define SET_DUMPER_PRECISION(a,b)
 #define SET_DUMPERS_PRECISION(a)
 #define SET_DUMPER_CSV_DELIMITERS(a,b,c)
@@ -45,6 +44,10 @@ private:
     std::set<std::string> fileNamesSet_;
     // Returns the path of the Dumper object associated with the current thread
     std::string& getPath();
+    // Default precision for doubles in Dumpers
+    int defaultPrecision_ = 15;
+    char defaultCsvValueDelimiter_ = ',';
+    char defaultCsvLineDelimiter_  = '\n';
 
     // Mutex objects for synchronizing access to the container
     std::mutex createDumperManagerMutex_;
@@ -57,7 +60,7 @@ public:
     // Updates the path of the Dumper object created by the current thread
     void updatePath(const std::string& path);
     // Creates a new Dumper object with the specified name, dump size and count max
-    void createDumper(const std::string& name, int dumpSize = -1, int countMax = -1);
+    Dumper* createDumper(const std::string& name);
     // Returns a pointer to the Dumper object with the specified name
     Dumper* getDumper(const std::string& name);
     // Destroys all the Dumper objects associated with the current thread
@@ -70,14 +73,16 @@ public:
     void setDumpersCSVDelimiters(char valueDelimiter, char lineDelimiter);
     // Sets the csv delimiter characters for the Dumper object with the specified name and associated with the current thread
     void setDumperCSVDelimiters(const std::string& name, char valueDelimiter, char lineDelimiter);
+    // Sets the maximum number of dumps to run on a specific Dumper
+    void setDumperMaxDumps(const std::string& name, int maxDumps);
     // Dumps the data buffer using the Dumper object with the specified name
     template<typename T>
-    void dump(T& buf, const std::string& name)
+    void dump(const std::string& name, T& buf, int size = -1)
     {
         Dumper* dumper = getDumper(name);
         if (dumper)
         {
-            dumper->dump(buf);
+            dumper->dump(buf, size);
         }
     }
 };

@@ -119,11 +119,9 @@ class CArrayVariableDumperTs : public VariableDumperTs
 		std::vector<std::vector<long double>> testArray2;
 		testArray2.push_back(std::vector<long double>{&array2[0], &array2[0] + size });
 
-		INIT_DUMPER("array1", size);
-		INIT_DUMPER("array2", size);
-		DUMP_VAR(array1_1, "array1");
-		DUMP_VAR(array1_2, "array1");
-		DUMP_VAR(array2, "array2");
+		DUMP_VAR("array1", array1_1, size);
+		DUMP_VAR("array1", array1_2, size);
+		DUMP_VAR("array2", array2,   size);
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(testArray1, filePath1));
@@ -141,8 +139,7 @@ public:
 		// Sets the path of the dumpers associated to this thread
 		SET_DUMPERS_PATH(path);
 
-		INIT_DUMPER(dumperName, size);
-		DUMP_VAR(array, dumperName);
+		DUMP_VAR(dumperName, array, size);
 
 		// Destroys the dumpers associated to this thread
 		DESTROY_DUMPERS();
@@ -224,11 +221,9 @@ class BasicContainerVariableDumperTs : public VariableDumperTs
 		std::vector<std::vector<int>> testArray;
 		testArray.push_back(std::vector<int>(array.begin(), array.end()));
 
-		INIT_DUMPER("vec");
-		INIT_DUMPER("array");
-		DUMP_VAR(vec[0], "vec");
-		DUMP_VAR(vec[1], "vec");
-		DUMP_VAR(array, "array");
+		DUMP_VAR("vec", vec[0]);
+		DUMP_VAR("vec", vec[1]);
+		DUMP_VAR("array", array);
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(vec, filePath1));
@@ -290,8 +285,7 @@ class NoCopyCustomContainerVariableDumperTs : public VariableDumperTs
 		std::vector<std::vector<int>>  vec1 = { { 1, 2, 3, 4 } };
 		testingContainer cont(vec1[0]);
 
-		INIT_DUMPER("cont");
-		DUMP_VAR(cont, "cont");
+		DUMP_VAR("cont", cont);
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(vec1, filePath1));
@@ -310,9 +304,8 @@ class ContainerDifferentSizeVariableDumperTs : public VariableDumperTs
 
 		std::vector<std::vector<int>> vec = { { 1, 2, 3, 4}, {5, 6, 7, 8, 9, 10, 11, 12 } };
 
-		INIT_DUMPER("vec");
-		DUMP_VAR(vec[0], "vec");
-		DUMP_VAR(vec[1], "vec");
+		DUMP_VAR("vec", vec[0]);
+		DUMP_VAR("vec", vec[1]);
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(vec, filePath1));
@@ -331,9 +324,8 @@ class StringsContainerVariableDumperTs : public VariableDumperTs
 
 		std::vector<std::vector<std::string>> strings = { { "This ", "is", " a", " test."}, {"This ", "is", " also ", "a ", "test ", "of ", "different", "length", "."}};
 
-		INIT_DUMPER("strings");
-		DUMP_VAR(strings[0], "strings");
-		DUMP_VAR(strings[1], "strings");
+		DUMP_VAR("strings", strings[0]);
+		DUMP_VAR("strings", strings[1]);
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(strings, filePath1));
@@ -352,9 +344,8 @@ class CStringsContainerVariableDumperTs : public VariableDumperTs
 
 		std::vector<std::vector<const char*>> strings = { { "This ", "is", " a", " test."}, {"This ", "is", " also ", "a ", "test ", "of ", "different", "length", "."}};
 
-		INIT_DUMPER("strings");
-		DUMP_VAR(strings[0], "strings");
-		DUMP_VAR(strings[1], "strings");
+		DUMP_VAR("strings", strings[0]);
+		DUMP_VAR("strings", strings[1]);
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(strings, filePath1));
@@ -373,16 +364,14 @@ class SetPrecisionVariableDumperTs : public VariableDumperTs
 
 		std::vector<std::vector<long double>> vec1 = { { 1 * pi_, 2 * pi_, 3 * pi_, 4 * pi_ } };
 
-		INIT_DUMPER("vec1");
 		SET_DUMPER_PRECISION("vec1", 12);
-		DUMP_VAR(vec1[0], "vec1");
+		DUMP_VAR("vec1", vec1[0]);
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(vec1, filePath1, 12));
 
-		INIT_DUMPER("vec1");
 		SET_DUMPERS_PRECISION(13);
-		DUMP_VAR(vec1[0], "vec1");
+		DUMP_VAR("vec1", vec1[0]);
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(vec1, filePath1, 13));
@@ -402,9 +391,9 @@ class MaxCountVariableDumperTs : public VariableDumperTs
 		std::vector<std::vector<int>> vec = { { 1, 2, 3, 4}, {5, 6, 7, 8 } };
 		std::vector<std::vector<int>> testVec = { { 1, 2, 3, 4} };
 
-		INIT_DUMPER("vec", -1, 1);
-		DUMP_VAR(vec[0], "vec");
-		DUMP_VAR(vec[1], "vec");
+		SET_DUMPER_MAX_DUMPS("vec", 1);
+		DUMP_VAR("vec", vec[0]);
+		DUMP_VAR("vec", vec[1]);
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(testVec, filePath1));
@@ -424,9 +413,8 @@ class DumpSizeVariableDumperTs : public VariableDumperTs
 		std::vector<std::vector<int>> vec = { { 1, 2, 3, 4}, {5, 6, 7, 8 } };
 		std::vector<std::vector<int>> testVec = { { 1, 2, 3}, {5, 6, 7 } };
 
-		INIT_DUMPER("vec", 3);
-		DUMP_VAR(vec[0], "vec");
-		DUMP_VAR(vec[1], "vec");
+		DUMP_VAR("vec", vec[0], 3);
+		DUMP_VAR("vec", vec[1], 3);
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(testVec, filePath1));
@@ -446,8 +434,7 @@ class ComplexContainerVariableDumperTs : public VariableDumperTs
 		std::vector<std::vector<std::complex<double>>> vec = { { {1., 2.}, {3., 4.} } };
 		std::vector<std::vector<double>> testVec = { {1., 2., 3., 4.} };
 
-		INIT_DUMPER("vec", 3);
-		DUMP_VAR(vec[0], "vec");
+		DUMP_VAR("vec", vec[0]);
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(testVec, filePath1, 15));
@@ -466,18 +453,16 @@ class SetDelimitersVariableDumperTs : public VariableDumperTs
 
 		std::vector<std::vector<int>> vec = { { 1, 2, 3, 4}, {5, 6, 7, 8 } };
 
-		INIT_DUMPER("vec");
 		SET_DUMPERS_CSV_DELIMITERS(',', ';');
-		DUMP_VAR(vec[0], "vec");
-		DUMP_VAR(vec[1], "vec");
+		DUMP_VAR("vec", vec[0]);
+		DUMP_VAR("vec", vec[1]);
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(vec, filePath1, 12, ',', ';'));
 
-		INIT_DUMPER("vec");
 		SET_DUMPER_CSV_DELIMITERS("vec", ';', '\n');
-		DUMP_VAR(vec[0], "vec");
-		DUMP_VAR(vec[1], "vec");
+		DUMP_VAR("vec", vec[0]);
+		DUMP_VAR("vec", vec[1]);
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(vec, filePath1, 12, ';', '\n'));
