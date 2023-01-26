@@ -33,14 +33,12 @@ public:
 protected:
 	virtual void runTest() = 0;
 	template<typename T>
-	bool isArrayEqualToCSV(std::vector<std::vector<T>>& array, const std::string& fileName, int precision = 12)
+	bool isArrayEqualToCSV(std::vector<std::vector<T>>& array, const std::string& fileName, int precision = 12, char valueDelimiter = ',', char lineDelimiter = '\n')
 	{
 		std::ifstream file(fileName);
 		std::string line, cell;
 		int index1 = 0;
-		char delim1 = '\n';
-		char delim2 = ';';
-		while (getline(file, line, delim1))
+		while (getline(file, line, lineDelimiter))
 		{
 			int index2 = 0;
 			if (index1 >= array.size())
@@ -48,7 +46,7 @@ protected:
 				return false;
 			}
 			std::stringstream lineStream(line);
-			while (getline(lineStream, cell, delim2))
+			while (getline(lineStream, cell, valueDelimiter))
 			{
 				if (index2 >= array[index1].size())
 				{
@@ -461,9 +459,28 @@ public:
 	virtual ~ComplexContainerVariableDumperTs() {};
 };
 
-// TODO
-// Add custom delimiters
-// Remove .csv from name
+class SetDelimitersVariableDumperTs : public VariableDumperTs
+{
+	void runTest() override
+	{
+		SET_DUMPERS_PATH(path_);
+
+		std::string filePath1 = path_ + "vec.csv";
+
+		std::vector<std::vector<int>> vec = { { 1, 2, 3, 4}, {5, 6, 7, 8 } };
+
+		INIT_DUMPER("vec");
+		SET_CSV_DELIMITERS(',', ';');
+		DUMP_VAR(vec[0], "vec");
+		DUMP_VAR(vec[1], "vec");
+		DESTROY_DUMPERS();
+
+		assert(isArrayEqualToCSV(vec, filePath1, 12, ',', ';'));
+	}
+public:
+	virtual ~SetDelimitersVariableDumperTs() {};
+};
+
 int main()
 {
 	INIT_VARIABLE_DUMPER(VARIABLE_DUMPER_TEST_DATA_DIR);
@@ -479,5 +496,6 @@ int main()
 	SetPrecisionVariableDumperTs{}.run();
 	MaxCountVariableDumperTs{}.run();
 	DumpSizeVariableDumperTs{}.run();
+	SetDelimitersVariableDumperTs{}.run();
 	return false;
 }

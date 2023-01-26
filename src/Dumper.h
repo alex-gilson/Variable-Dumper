@@ -35,22 +35,25 @@ class Dumper
 	int count_;
 	std::ofstream outFile_;
 	int precisionDigits_;
+	char valueDelimiter_;
+	char lineDelimiter_;
 
 public:
 	Dumper(std::string fileName, int dumpSize, int maxCount);
 	Dumper(Dumper& other) = delete;
 	~Dumper();
 	void setPrecision(int precision);
+	void setCSVDelimiters(char valueDelimiter, char lineDelimiter);
 	template<typename T>
 	void dumpVal(T& val)
 	{
 		if constexpr (is_complex_t<T>::value)
 		{
-			outFile_ << val.real() << ";" << val.imag() << ";";
+			outFile_ << val.real() << valueDelimiter_ << val.imag() << valueDelimiter_;
 		}
 		else
 		{
-			outFile_ << val << ";";
+			outFile_ << val << valueDelimiter_;
 		}
 	}
 	// Default dumper
@@ -84,7 +87,7 @@ public:
 				dumpVal(buf[i]);
 			}
 		}
-		outFile_ << "\n";
+		outFile_ << lineDelimiter_;
 		count_++;
 	}
 };

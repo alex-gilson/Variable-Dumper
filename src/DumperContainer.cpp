@@ -63,6 +63,14 @@ void DumperContainer::setDumpersPrecision(int precision)
 	}
 }
 
+void DumperContainer::setCSVDelimiters(char valueDelimiter, char lineDelimiter)
+{
+	for (auto& fileName : fileNamesSet_)
+	{
+		dumperFileNameMap_.at(fileName)->setCSVDelimiters(valueDelimiter, lineDelimiter);
+	}
+}
+
 void DumperContainer::destroyDumpers()
 {
 	std::lock_guard<std::mutex> destroyDumpersLock(writeToDumperMapMutex_);

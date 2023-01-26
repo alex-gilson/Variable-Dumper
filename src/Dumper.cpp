@@ -10,6 +10,8 @@ Dumper::Dumper(std::string fileName, int dumpSize, int maxCount)
 	, count_(0)
 	, outFile_(fileName_ + ".csv", std::ios::out)
 	, precisionDigits_(15)
+	, valueDelimiter_(',')
+	, lineDelimiter_('\n')
 {
 	outFile_ << std::setprecision(precisionDigits_);
 }
@@ -18,6 +20,12 @@ void Dumper::setPrecision(int precision)
 {
 	precisionDigits_ = precision;
 	outFile_ << std::setprecision(precisionDigits_);
+}
+
+void Dumper::setCSVDelimiters(char valueDelimiter, char lineDelimiter)
+{
+	valueDelimiter_ = valueDelimiter;
+	lineDelimiter_  = lineDelimiter;
 }
 
 Dumper::~Dumper()
