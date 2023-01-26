@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <cassert>
 #include <array>
-#include <iostream>
+#include <complex>
 
 using namespace VariableDumper;
 DumperContainer* DumperContainer::instance = 0;
@@ -440,6 +440,27 @@ public:
 	virtual ~DumpSizeVariableDumperTs() {};
 };
 
+class ComplexContainerVariableDumperTs : public VariableDumperTs
+{
+	void runTest() override
+	{
+		SET_DUMPERS_PATH(path_);
+
+		std::string filePath1 = path_ + "vec.csv";
+
+		std::vector<std::vector<std::complex<double>>> vec = { { {1., 2.}, {3., 4.} } };
+		std::vector<std::vector<double>> testVec = { {1., 2., 3., 4.} };
+
+		INIT_DUMPER("vec.csv", 3);
+		DUMP_VAR(vec[0], "vec.csv");
+		DESTROY_DUMPERS();
+
+		assert(isArrayEqualToCSV(testVec, filePath1, 15));
+	}
+public:
+	virtual ~ComplexContainerVariableDumperTs() {};
+};
+
 int main()
 {
 	INIT_VARIABLE_DUMPER(VARIABLE_DUMPER_TEST_DATA_DIR);
@@ -451,6 +472,7 @@ int main()
 	ContainerDifferentSizeVariableDumperTs{}.run();
 	StringsContainerVariableDumperTs{}.run();
 	CStringsContainerVariableDumperTs{}.run();
+	ComplexContainerVariableDumperTs{}.run();
 	SetPrecisionVariableDumperTs{}.run();
 	MaxCountVariableDumperTs{}.run();
 	DumpSizeVariableDumperTs{}.run();
