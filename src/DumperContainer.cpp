@@ -63,11 +63,20 @@ void DumperContainer::setDumpersPrecision(int precision)
 	}
 }
 
-void DumperContainer::setCSVDelimiters(char valueDelimiter, char lineDelimiter)
+void DumperContainer::setDumpersCSVDelimiters(char valueDelimiter, char lineDelimiter)
 {
 	for (auto& fileName : fileNamesSet_)
 	{
 		dumperFileNameMap_.at(fileName)->setCSVDelimiters(valueDelimiter, lineDelimiter);
+	}
+}
+
+void DumperContainer::setDumperCSVDelimiters(const std::string& name, char valueDelimiter, char lineDelimiter)
+{
+	Dumper* dumper = getDumper(name);
+	if (dumper)
+	{
+		dumper->setCSVDelimiters(valueDelimiter, lineDelimiter);
 	}
 }
 

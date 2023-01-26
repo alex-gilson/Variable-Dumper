@@ -470,12 +470,20 @@ class SetDelimitersVariableDumperTs : public VariableDumperTs
 		std::vector<std::vector<int>> vec = { { 1, 2, 3, 4}, {5, 6, 7, 8 } };
 
 		INIT_DUMPER("vec");
-		SET_CSV_DELIMITERS(',', ';');
+		SET_DUMPERS_CSV_DELIMITERS(',', ';');
 		DUMP_VAR(vec[0], "vec");
 		DUMP_VAR(vec[1], "vec");
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(vec, filePath1, 12, ',', ';'));
+
+		INIT_DUMPER("vec");
+		SET_DUMPER_CSV_DELIMITERS("vec", ';', '\n');
+		DUMP_VAR(vec[0], "vec");
+		DUMP_VAR(vec[1], "vec");
+		DESTROY_DUMPERS();
+
+		assert(isArrayEqualToCSV(vec, filePath1, 12, ';', '\n'));
 	}
 public:
 	virtual ~SetDelimitersVariableDumperTs() {};

@@ -6,14 +6,15 @@
 #include <set>
 
 #ifndef VARIABLE_DUMPER_DISABLED
-#define INIT_VARIABLE_DUMPER(a)         DumperContainer::getDumperContainer(a)
-#define SET_DUMPERS_PATH(a)             DumperContainer::getDumperContainer()->updatePath(a)
-#define DESTROY_DUMPERS()               DumperContainer::getDumperContainer()->destroyDumpers()
-#define INIT_DUMPER(fileName, ...)      DumperContainer::getDumperContainer()->createDumper(fileName, __VA_ARGS__)
-#define DUMP_VAR(a,b)                   DumperContainer::getDumperContainer()->dump(a,b)
-#define SET_DUMPER_PRECISION(a,b)       DumperContainer::getDumperContainer()->setDumperPrecision(a,b)
-#define SET_DUMPERS_PRECISION(a)        DumperContainer::getDumperContainer()->setDumpersPrecision(a)
-#define SET_CSV_DELIMITERS(a,b)         DumperContainer::getDumperContainer()->setCSVDelimiters(a,b)
+#define INIT_VARIABLE_DUMPER(a)          DumperContainer::getDumperContainer(a)
+#define SET_DUMPERS_PATH(a)              DumperContainer::getDumperContainer()->updatePath(a)
+#define DESTROY_DUMPERS()                DumperContainer::getDumperContainer()->destroyDumpers()
+#define INIT_DUMPER(fileName, ...)       DumperContainer::getDumperContainer()->createDumper(fileName, __VA_ARGS__)
+#define DUMP_VAR(a,b)                    DumperContainer::getDumperContainer()->dump(a,b)
+#define SET_DUMPER_PRECISION(a,b)        DumperContainer::getDumperContainer()->setDumperPrecision(a,b)
+#define SET_DUMPERS_PRECISION(a)         DumperContainer::getDumperContainer()->setDumpersPrecision(a)
+#define SET_DUMPER_CSV_DELIMITERS(a,b,c) DumperContainer::getDumperContainer()->setDumperCSVDelimiters(a,b,c)
+#define SET_DUMPERS_CSV_DELIMITERS(a,b)  DumperContainer::getDumperContainer()->setDumpersCSVDelimiters(a,b)
 #else
 #define INIT_VARIABLE_DUMPER(a)
 #define SET_DUMPERS_PATH(a)
@@ -22,7 +23,8 @@
 #define DUMP_VAR(a,b)
 #define SET_DUMPER_PRECISION(a,b)
 #define SET_DUMPERS_PRECISION(a)
-#define SET_CSV_DELIMITERS(a,b)
+#define SET_DUMPER_CSV_DELIMITERS(a,b,c)
+#define SET_DUMPERS_CSV_DELIMITERS(a,b)
 #endif
 
 namespace VariableDumper
@@ -67,7 +69,9 @@ public:
     // Sets the precision of all the Dumper objects created
     void setDumpersPrecision(int precision);
     // Sets the csv delimiter characters for all the dumpers
-    void setCSVDelimiters(char valueDelimiter, char lineDelimiter);
+    void setDumpersCSVDelimiters(char valueDelimiter, char lineDelimiter);
+    // Sets the csv delimiter characters for the Dumper object with the specified name and associated with the current thread
+    void setDumperCSVDelimiters(const std::string& name, char valueDelimiter, char lineDelimiter);
     // Dumps the data buffer using the Dumper object with the specified name
     template<typename T>
     void dump(T& buf, const std::string& name)
