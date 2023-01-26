@@ -8,7 +8,7 @@ Dumper::Dumper(std::string fileName, int dumpSize, int maxCount)
 	, dumpSize_(dumpSize)
 	, maxCount_(maxCount)
 	, count_(0)
-	, outFile_(fileName_, std::ios::out)
+	, outFile_(fileName_ + ".csv", std::ios::out)
 	, precisionDigits_(15)
 {
 	outFile_ << std::setprecision(precisionDigits_);
