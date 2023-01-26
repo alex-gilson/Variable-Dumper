@@ -6,7 +6,6 @@
 #include <complex>
 
 using namespace VariableDumper;
-DumperManager* DumperManager::instance = 0;
 
 class VariableDumperTs
 {

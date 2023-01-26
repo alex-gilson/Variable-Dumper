@@ -5,6 +5,7 @@
 namespace VariableDumper
 {
 
+DumperManager* DumperManager::instance = 0;
 std::mutex DumperManagerMutex;
 
 DumperManager::DumperManager(std::string path)
