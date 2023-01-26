@@ -135,7 +135,7 @@ int main()
 }
 ```
 
-To easily disable Variable-Dumper just add this line above inclusion of the DumperManager header file.
+To easily disable Variable-Dumper just add this line above the inclusion of the DumperManager header file.
 
 ```C++
 #define VARIABLE_DUMPER_DISABLED
