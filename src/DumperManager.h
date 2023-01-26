@@ -6,8 +6,6 @@
 #include <set>
 
 #ifndef VARIABLE_DUMPER_DISABLED
-//#define INIT_VARIABLE_DUMPER(a)          DumperManager::getDumperManager(a)
-#define INIT_VARIABLE_DUMPER(...)        DumperManager::getDumperManager(__VA_ARGS__)
 #define SET_DUMPERS_PATH(a)              DumperManager::getDumperManager()->updatePath(a)
 #define DESTROY_DUMPERS()                DumperManager::getDumperManager()->destroyDumpers()
 #define INIT_DUMPER(fileName, ...)       DumperManager::getDumperManager()->createDumper(fileName, __VA_ARGS__)
@@ -17,7 +15,6 @@
 #define SET_DUMPER_CSV_DELIMITERS(a,b,c) DumperManager::getDumperManager()->setDumperCSVDelimiters(a,b,c)
 #define SET_DUMPERS_CSV_DELIMITERS(a,b)  DumperManager::getDumperManager()->setDumpersCSVDelimiters(a,b)
 #else
-#define INIT_VARIABLE_DUMPER(a)
 #define SET_DUMPERS_PATH(a)
 #define DESTROY_DUMPERS()
 #define INIT_DUMPER(a,b,c,d,e,f)

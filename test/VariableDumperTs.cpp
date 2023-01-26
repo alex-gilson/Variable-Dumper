@@ -490,7 +490,6 @@ public:
 
 int main()
 {
-	INIT_VARIABLE_DUMPER(VARIABLE_DUMPER_TEST_DATA_DIR);
 	CArrayVariableDumperTs{}.run();
 	MultithreadSamePathVariableDumperTs{}.run(100);
 	MultithreadDifferentPathVariableDumperTs{}.run(100);
