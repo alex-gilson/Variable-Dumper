@@ -18,11 +18,10 @@ add_subdirectory(Variable-Dumper)
 
 # Usage
 
-Simply add the following lines to your code:
+Simply add the following line to your code:
 
 ```C++
 #include "DumperManager.h"
-using namespace VariableDumper;
 ```
 
 Set the path for the dumpers with the command below. Otherwise the current path will be used. The path is set only the dumpers in the current thread.
@@ -100,8 +99,6 @@ The following example demostrates how to run two threads for the same algorithm 
 #include <thread>
 #include <string>
 
-using namespace VariableDumper;
-
 void runThreadTask(const std::string path, const std::string dumperName, int array[], int size)
 {
   // Sets the path of the dumpers associated to this thread
@@ -124,7 +121,7 @@ int main()
 
   constexpr int size = 4;
   int array1[size] = { 1, 2, 3, 4 };
-  int array2[size] = { 1, 2, 3, 4 };
+  int array2[size] = { 5, 6, 7, 8 };
 
   std::thread t1(runThreadTask, path1, dumperName1, array1, size);
   std::thread t2(runThreadTask, path2, dumperName2, array2, size);
