@@ -5,8 +5,6 @@
 #include <array>
 #include <complex>
 
-using namespace VariableDumper;
-
 class VariableDumperTs
 {
 public:

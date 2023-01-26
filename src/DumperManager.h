@@ -6,14 +6,14 @@
 #include <set>
 
 #ifndef VARIABLE_DUMPER_DISABLED
-#define SET_DUMPERS_PATH(a)              DumperManager::getDumperManager()->updatePath(a)
-#define DESTROY_DUMPERS()                DumperManager::getDumperManager()->destroyDumpers()
-#define INIT_DUMPER(fileName, ...)       DumperManager::getDumperManager()->createDumper(fileName, __VA_ARGS__)
-#define DUMP_VAR(a,b)                    DumperManager::getDumperManager()->dump(a,b)
-#define SET_DUMPER_PRECISION(a,b)        DumperManager::getDumperManager()->setDumperPrecision(a,b)
-#define SET_DUMPERS_PRECISION(a)         DumperManager::getDumperManager()->setDumpersPrecision(a)
-#define SET_DUMPER_CSV_DELIMITERS(a,b,c) DumperManager::getDumperManager()->setDumperCSVDelimiters(a,b,c)
-#define SET_DUMPERS_CSV_DELIMITERS(a,b)  DumperManager::getDumperManager()->setDumpersCSVDelimiters(a,b)
+#define SET_DUMPERS_PATH(a)              VariableDumper::DumperManager::getDumperManager()->updatePath(a)
+#define DESTROY_DUMPERS()                VariableDumper::DumperManager::getDumperManager()->destroyDumpers()
+#define INIT_DUMPER(fileName, ...)       VariableDumper::DumperManager::getDumperManager()->createDumper(fileName, __VA_ARGS__)
+#define DUMP_VAR(a,b)                    VariableDumper::DumperManager::getDumperManager()->dump(a,b)
+#define SET_DUMPER_PRECISION(a,b)        VariableDumper::DumperManager::getDumperManager()->setDumperPrecision(a,b)
+#define SET_DUMPERS_PRECISION(a)         VariableDumper::DumperManager::getDumperManager()->setDumpersPrecision(a)
+#define SET_DUMPER_CSV_DELIMITERS(a,b,c) VariableDumper::DumperManager::getDumperManager()->setDumperCSVDelimiters(a,b,c)
+#define SET_DUMPERS_CSV_DELIMITERS(a,b)  VariableDumper::DumperManager::getDumperManager()->setDumpersCSVDelimiters(a,b)
 #else
 #define SET_DUMPERS_PATH(a)
 #define DESTROY_DUMPERS()
