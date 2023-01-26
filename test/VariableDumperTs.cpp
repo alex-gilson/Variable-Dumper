@@ -1,12 +1,12 @@
 
-#include "DumperContainer.h"
+#include "DumperManager.h"
 #include <filesystem>
 #include <cassert>
 #include <array>
 #include <complex>
 
 using namespace VariableDumper;
-DumperContainer* DumperContainer::instance = 0;
+DumperManager* DumperManager::instance = 0;
 
 class VariableDumperTs
 {

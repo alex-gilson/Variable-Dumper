@@ -1,38 +1,38 @@
-#include "DumperContainer.h"
+#include "DumperManager.h"
 #include <filesystem>
 #include <vector>
 
 namespace VariableDumper
 {
 
-std::mutex dumperContainerMutex;
+std::mutex DumperManagerMutex;
 
-DumperContainer::DumperContainer(std::string path)
+DumperManager::DumperManager(std::string path)
 {
 	updatePath(path);
 }
 
-std::string& DumperContainer::getPath()
+std::string& DumperManager::getPath()
 {
 	return pathMap_[std::this_thread::get_id()];
 }
 
-DumperContainer* DumperContainer::getDumperContainer(const std::string& path)
+DumperManager* DumperManager::getDumperManager(const std::string& path)
 {
-	std::lock_guard<std::mutex> dumperLock(dumperContainerMutex);
+	std::lock_guard<std::mutex> dumperLock(DumperManagerMutex);
 	if (!instance) {
-		instance = new DumperContainer{ path };
+		instance = new DumperManager{ path };
 	}
 	return instance;
 }
 
-void DumperContainer::updatePath(const std::string& path)
+void DumperManager::updatePath(const std::string& path)
 {
 	std::lock_guard<std::mutex> updatePathLock(updatePathMutex_);
 	pathMap_[std::this_thread::get_id()] = path;
 }
 
-void DumperContainer::createDumper(const std::string& name, int dumpSize, int countMax)
+void DumperManager::createDumper(const std::string& name, int dumpSize, int countMax)
 {
 	std::lock_guard<std::mutex> createDumperVarLock(writeToDumperMapMutex_);
 	std::string& path = getPath();
@@ -46,7 +46,7 @@ void DumperContainer::createDumper(const std::string& name, int dumpSize, int co
 	threadFileNamesMap_[std::this_thread::get_id()].insert(fileName);
 }
 
-void DumperContainer::setDumperPrecision(const std::string& name, int precision)
+void DumperManager::setDumperPrecision(const std::string& name, int precision)
 {
 	Dumper* dumper = getDumper(name);
 	if (dumper)
@@ -55,7 +55,7 @@ void DumperContainer::setDumperPrecision(const std::string& name, int precision)
 	}
 }
 
-void DumperContainer::setDumpersPrecision(int precision)
+void DumperManager::setDumpersPrecision(int precision)
 {
 	for (auto& fileName : fileNamesSet_)
 	{
@@ -63,7 +63,7 @@ void DumperContainer::setDumpersPrecision(int precision)
 	}
 }
 
-void DumperContainer::setDumpersCSVDelimiters(char valueDelimiter, char lineDelimiter)
+void DumperManager::setDumpersCSVDelimiters(char valueDelimiter, char lineDelimiter)
 {
 	for (auto& fileName : fileNamesSet_)
 	{
@@ -71,7 +71,7 @@ void DumperContainer::setDumpersCSVDelimiters(char valueDelimiter, char lineDeli
 	}
 }
 
-void DumperContainer::setDumperCSVDelimiters(const std::string& name, char valueDelimiter, char lineDelimiter)
+void DumperManager::setDumperCSVDelimiters(const std::string& name, char valueDelimiter, char lineDelimiter)
 {
 	Dumper* dumper = getDumper(name);
 	if (dumper)
@@ -80,7 +80,7 @@ void DumperContainer::setDumperCSVDelimiters(const std::string& name, char value
 	}
 }
 
-void DumperContainer::destroyDumpers()
+void DumperManager::destroyDumpers()
 {
 	std::lock_guard<std::mutex> destroyDumpersLock(writeToDumperMapMutex_);
 	std::vector<std::string> fileNamesToErase;
@@ -97,7 +97,7 @@ void DumperContainer::destroyDumpers()
 	}
 }
 
-Dumper* DumperContainer::getDumper(const std::string& name)
+Dumper* DumperManager::getDumper(const std::string& name)
 {
 	std::set<std::string>& fileNameSetFromThread = threadFileNamesMap_[std::this_thread::get_id()];
 	std::string fileName = getPath() + name;

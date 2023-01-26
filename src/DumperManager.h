@@ -6,15 +6,15 @@
 #include <set>
 
 #ifndef VARIABLE_DUMPER_DISABLED
-#define INIT_VARIABLE_DUMPER(a)          DumperContainer::getDumperContainer(a)
-#define SET_DUMPERS_PATH(a)              DumperContainer::getDumperContainer()->updatePath(a)
-#define DESTROY_DUMPERS()                DumperContainer::getDumperContainer()->destroyDumpers()
-#define INIT_DUMPER(fileName, ...)       DumperContainer::getDumperContainer()->createDumper(fileName, __VA_ARGS__)
-#define DUMP_VAR(a,b)                    DumperContainer::getDumperContainer()->dump(a,b)
-#define SET_DUMPER_PRECISION(a,b)        DumperContainer::getDumperContainer()->setDumperPrecision(a,b)
-#define SET_DUMPERS_PRECISION(a)         DumperContainer::getDumperContainer()->setDumpersPrecision(a)
-#define SET_DUMPER_CSV_DELIMITERS(a,b,c) DumperContainer::getDumperContainer()->setDumperCSVDelimiters(a,b,c)
-#define SET_DUMPERS_CSV_DELIMITERS(a,b)  DumperContainer::getDumperContainer()->setDumpersCSVDelimiters(a,b)
+#define INIT_VARIABLE_DUMPER(a)          DumperManager::getDumperManager(a)
+#define SET_DUMPERS_PATH(a)              DumperManager::getDumperManager()->updatePath(a)
+#define DESTROY_DUMPERS()                DumperManager::getDumperManager()->destroyDumpers()
+#define INIT_DUMPER(fileName, ...)       DumperManager::getDumperManager()->createDumper(fileName, __VA_ARGS__)
+#define DUMP_VAR(a,b)                    DumperManager::getDumperManager()->dump(a,b)
+#define SET_DUMPER_PRECISION(a,b)        DumperManager::getDumperManager()->setDumperPrecision(a,b)
+#define SET_DUMPERS_PRECISION(a)         DumperManager::getDumperManager()->setDumpersPrecision(a)
+#define SET_DUMPER_CSV_DELIMITERS(a,b,c) DumperManager::getDumperManager()->setDumperCSVDelimiters(a,b,c)
+#define SET_DUMPERS_CSV_DELIMITERS(a,b)  DumperManager::getDumperManager()->setDumpersCSVDelimiters(a,b)
 #else
 #define INIT_VARIABLE_DUMPER(a)
 #define SET_DUMPERS_PATH(a)
@@ -30,13 +30,13 @@
 namespace VariableDumper
 {
 
-class DumperContainer
+class DumperManager
 {
 private:
     // Constructor that takes in the path of the Dumper object for non multithreaded runtimes
-    DumperContainer(std::string path);
-    // Pointer to the singleton instance of DumperContainer
-    static DumperContainer* instance;
+    DumperManager(std::string path);
+    // Pointer to the singleton instance of DumperManager
+    static DumperManager* instance;
     // Maps the file name of a Dumper object to the corresponding Dumper
     std::unordered_map<std::string, std::unique_ptr<Dumper>> dumperFileNameMap_;
     // Maps the thread ID of a thread to the path of all Dumpers assigned to that thread
@@ -49,13 +49,13 @@ private:
     std::string& getPath();
 
     // Mutex objects for synchronizing access to the container
-    std::mutex createDumperContainerMutex_;
+    std::mutex createDumperManagerMutex_;
     std::mutex writeToDumperMapMutex_;
     std::mutex updatePathMutex_;
 
 public:
-    // Returns a pointer to the singleton instance of DumperContainer
-    static DumperContainer* getDumperContainer(const std::string& path = "");
+    // Returns a pointer to the singleton instance of DumperManager
+    static DumperManager* getDumperManager(const std::string& path = "");
     // Updates the path of the Dumper object created by the current thread
     void updatePath(const std::string& path);
     // Creates a new Dumper object with the specified name, dump size and count max
