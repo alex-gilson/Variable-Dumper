@@ -25,10 +25,10 @@ Simply add the following lines to your code:
 using namespace VariableDumper;
 ```
 
-To initialize the DumperManager add the command below with the desired output path. It only has to be run once by any thread. You will be able to update this path for each thread individually but, for now, give it a default. If no argument is given, the current path will be used.
+Set the path for the dumpers with the command below. Otherwise the current path will be used. The path is set only the dumpers in the current thread.
 
 ```C++
-INIT_VARIABLE_DUMPER(OUTPUT_PATH);
+SET_DUMPERS_PATH(OUTPUT_PATH);
 ```
 
 For each variable you wish to dump, an associated dumper must be initialized.
@@ -44,7 +44,7 @@ std::vector<int> myVector = {1, 2, 3, 4};
 DUMP_VAR(myVector, "myVector");
 ```
 
-For the case where you are dealing with a c style array or when you want to reduce the number of values being printed of a container, you can set up a size.
+For the case where you are dealing with a c style array or when you want to reduce the number of values printed from a container, you can set up a size.
 
 ```C++
 int array[] = {1,2,3};
