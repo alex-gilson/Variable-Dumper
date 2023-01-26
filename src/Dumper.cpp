@@ -3,12 +3,12 @@
 namespace VariableDumper
 {
 
-Dumper::Dumper(std::string fileName, int dumpSize, int maxCount)
-	: fileName_(fileName)
+Dumper::Dumper(std::string name, int dumpSize, int maxCount)
+	: name_(name)
 	, dumpSize_(dumpSize)
 	, maxCount_(maxCount)
 	, count_(0)
-	, outFile_(fileName_ + ".csv", std::ios::out)
+	, outFile_(name_ + ".csv", std::ios::out)
 	, precisionDigits_(15)
 	, valueDelimiter_(',')
 	, lineDelimiter_('\n')

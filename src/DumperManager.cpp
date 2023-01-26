@@ -36,14 +36,17 @@ void DumperManager::createDumper(const std::string& name, int dumpSize, int coun
 {
 	std::lock_guard<std::mutex> createDumperVarLock(writeToDumperMapMutex_);
 	std::string& path = getPath();
-	std::filesystem::create_directory(path);
-	std::string fileName = path + name;
-	if (!fileNamesSet_.insert(fileName).second)
+	if (!path.empty() && path != ".")
+	{
+		std::filesystem::create_directory(path);
+	}
+	std::string fullName = path + name;
+	if (!fileNamesSet_.insert(fullName).second)
 	{
 		throw std::runtime_error("Dumper file has already been initialized.");
 	}
-	dumperFileNameMap_[fileName] = std::make_unique<Dumper>(fileName, dumpSize, countMax);
-	threadFileNamesMap_[std::this_thread::get_id()].insert(fileName);
+	dumperFileNameMap_[fullName] = std::make_unique<Dumper>(fullName, dumpSize, countMax);
+	threadFileNamesMap_[std::this_thread::get_id()].insert(fullName);
 }
 
 void DumperManager::setDumperPrecision(const std::string& name, int precision)

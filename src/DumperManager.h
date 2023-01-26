@@ -6,7 +6,8 @@
 #include <set>
 
 #ifndef VARIABLE_DUMPER_DISABLED
-#define INIT_VARIABLE_DUMPER(a)          DumperManager::getDumperManager(a)
+//#define INIT_VARIABLE_DUMPER(a)          DumperManager::getDumperManager(a)
+#define INIT_VARIABLE_DUMPER(...)        DumperManager::getDumperManager(__VA_ARGS__)
 #define SET_DUMPERS_PATH(a)              DumperManager::getDumperManager()->updatePath(a)
 #define DESTROY_DUMPERS()                DumperManager::getDumperManager()->destroyDumpers()
 #define INIT_DUMPER(fileName, ...)       DumperManager::getDumperManager()->createDumper(fileName, __VA_ARGS__)

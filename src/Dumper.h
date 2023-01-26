@@ -29,7 +29,7 @@ class Dumper
 		enum { value = sizeof(test<T>(0)) == sizeof(YesType) };
 	};
 
-	const std::string fileName_;
+	const std::string name_;
 	const int dumpSize_;
 	const int maxCount_;
 	int count_;
@@ -39,7 +39,7 @@ class Dumper
 	char lineDelimiter_;
 
 public:
-	Dumper(std::string fileName, int dumpSize, int maxCount);
+	Dumper(std::string name, int dumpSize, int maxCount);
 	Dumper(Dumper& other) = delete;
 	~Dumper();
 	void setPrecision(int precision);
