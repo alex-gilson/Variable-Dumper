@@ -6,11 +6,12 @@ namespace VariableDumper
 Dumper::Dumper(std::string name, int precision, char valueDelimiter, char lineDelimiter)
 	: name_(name)
 	, maxDumps_(-1)
-	, count_(0)
+	, count_(-1)
 	, outFile_(name_ + ".csv", std::ios::out)
 	, precisionDigits_(precision)
 	, valueDelimiter_(valueDelimiter)
 	, lineDelimiter_(lineDelimiter)
+	, currentDimension_(0)
 {
 	outFile_ << std::setprecision(precisionDigits_);
 }

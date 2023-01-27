@@ -36,6 +36,7 @@ class Dumper
 	int precisionDigits_;
 	char valueDelimiter_;
 	char lineDelimiter_;
+	int currentDimension_;
 
 public:
 	Dumper(std::string name, int precision, char valueDelimiter, char lineDelimiter);
@@ -47,6 +48,7 @@ public:
 	template<typename T>
 	void dumpVal(T& val, bool lastElementOfLine)
 	{
+		static_assert(!is_container_t<std::remove_pointer<T>>::value);
 		if constexpr (is_complex_t<T>::value)
 		{
 			outFile_ << val.real() << valueDelimiter_ << val.imag();
@@ -60,40 +62,58 @@ public:
 			outFile_ << valueDelimiter_;
 		}
 	}
-	// Default dumper
 	template<typename T>
 	void dump(T& buf, int dumpSize)
 	{
-		using remove_pointer_t = typename std::remove_pointer<T>::type;
-
-		if (count_ >= maxDumps_ && maxDumps_ != -1)
+		currentDimension_++;
+		if (currentDimension_ == 1)
 		{
-			return;
+			count_++;
 		}
+		using element_of_container_t = std::remove_reference_t<decltype(std::declval<T>()[0])>;
 
-		if constexpr (is_container_t<remove_pointer_t>::value)
+		// Check that the elements of the container are also containers but not of type std::string
+		if constexpr (is_container_t<element_of_container_t>::value
+			&& !std::is_same<element_of_container_t, std::string>::value)
 		{
-			int i = 0;
-			for (auto& val : buf)
+			// Unwrap the uppermost container
+			for (auto& subContainer : buf)
 			{
-				bool lastElementOfLine = (i == (buf.size() - 1) || i == (dumpSize - 1));
-				dumpVal(val, lastElementOfLine);
-				if (lastElementOfLine)
-				{
-					break;
-				}
-				i++;
+				dump(subContainer, dumpSize);
 			}
 		}
 		else
 		{
-			for (int i = 0; i < dumpSize; i++)
+			if (maxDumps_ != -1 && count_ >= maxDumps_)
 			{
-				dumpVal(buf[i], i == (dumpSize - 1));
+				currentDimension_--;
+				return;
 			}
+
+			if constexpr (is_container_t<typename std::remove_pointer<T>::type>::value)
+			{
+				int i = 0;
+				for (auto& val : buf)
+				{
+					bool lastElementOfLine = (i == (buf.size() - 1) || i == (dumpSize - 1));
+					dumpVal(val, lastElementOfLine);
+					if (lastElementOfLine)
+					{
+						break;
+					}
+					i++;
+				}
+			}
+			else
+			{
+				for (int i = 0; i < dumpSize; i++)
+				{
+					dumpVal(buf[i], i == (dumpSize - 1));
+				}
+			}
+			outFile_ << lineDelimiter_;
 		}
-		outFile_ << lineDelimiter_;
-		count_++;
+		currentDimension_--;
 	}
 };
 

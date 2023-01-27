@@ -11,6 +11,8 @@ public:
 	virtual ~VariableDumperTs() {};
 	virtual void setup()
 	{
+		SET_DUMPERS_PRECISION(15);
+		SET_DUMPERS_CSV_DELIMITERS(',', '\n');
 		std::filesystem::remove_all(path_);
 		std::filesystem::create_directory(path_);
 	};
@@ -471,6 +473,40 @@ public:
 	virtual ~SetDelimitersVariableDumperTs() {};
 };
 
+class MultidimensionalContainerVariableDumperTs : public VariableDumperTs
+{
+	void runTest() override
+	{
+		SET_DUMPERS_PATH(path_);
+
+		std::string filePath1 = path_ + "vec.csv";
+		std::string filePath2 = path_ + "vecStrings.csv";
+
+		std::vector<std::vector<int>> vec = { { 1, 2, 3, 4}, {5, 6, 7, 8 } };
+		std::vector<std::string> thisIsATest = {"This ", "is", " a", " test."};
+		std::vector<std::string> thisIsAlsoATestOfDifferentLength = {"This ", "is", " also ", "a ", "test ", "of ", "different", "length", "."};
+		std::vector<std::vector<std::string>> strings = { thisIsATest, thisIsAlsoATestOfDifferentLength };
+		std::vector<std::vector<std::vector<std::string>>> vecStrings;
+		vecStrings.push_back(strings);
+		vecStrings.push_back(strings);
+
+		// Flatten vecStrings
+		std::vector<std::vector<std::string>> testVecStrings = { thisIsATest, thisIsAlsoATestOfDifferentLength, thisIsATest, thisIsAlsoATestOfDifferentLength };
+
+		SET_DUMPER_MAX_DUMPS("vecStrings", 1);
+
+		DUMP_VAR("vec", vec);
+		DUMP_VAR("vecStrings", vecStrings);
+		DUMP_VAR("vecStrings", vecStrings); // Ignored because max dumps is set to 1
+		DESTROY_DUMPERS();
+
+		assert(isArrayEqualToCSV(vec, filePath1));
+		assert(isArrayEqualToCSV(testVecStrings, filePath2));
+	}
+public:
+	virtual ~MultidimensionalContainerVariableDumperTs() {};
+};
+
 int main()
 {
 	CArrayVariableDumperTs{}.run();
@@ -486,5 +522,6 @@ int main()
 	MaxCountVariableDumperTs{}.run();
 	DumpSizeVariableDumperTs{}.run();
 	SetDelimitersVariableDumperTs{}.run();
+	MultidimensionalContainerVariableDumperTs{}.run();
 	return false;
 }
