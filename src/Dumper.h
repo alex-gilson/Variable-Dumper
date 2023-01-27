@@ -45,15 +45,19 @@ public:
 	void setCSVDelimiters(char valueDelimiter, char lineDelimiter);
 	void setMaxDumps(int maxDumps);
 	template<typename T>
-	void dumpVal(T& val)
+	void dumpVal(T& val, bool lastElementOfLine)
 	{
 		if constexpr (is_complex_t<T>::value)
 		{
-			outFile_ << val.real() << valueDelimiter_ << val.imag() << valueDelimiter_;
+			outFile_ << val.real() << valueDelimiter_ << val.imag();
 		}
 		else
 		{
-			outFile_ << val << valueDelimiter_;
+			outFile_ << val;
+		}
+		if (!lastElementOfLine)
+		{
+			outFile_ << valueDelimiter_;
 		}
 	}
 	// Default dumper
@@ -72,11 +76,12 @@ public:
 			int i = 0;
 			for (auto& val : buf)
 			{
-				if (!(dumpSize == -1 || i < dumpSize))
+				bool lastElementOfLine = (i == (buf.size() - 1) || i == (dumpSize - 1));
+				dumpVal(val, lastElementOfLine);
+				if (lastElementOfLine)
 				{
 					break;
 				}
-				dumpVal(val);
 				i++;
 			}
 		}
@@ -84,7 +89,7 @@ public:
 		{
 			for (int i = 0; i < dumpSize; i++)
 			{
-				dumpVal(buf[i]);
+				dumpVal(buf[i], i == (dumpSize - 1));
 			}
 		}
 		outFile_ << lineDelimiter_;

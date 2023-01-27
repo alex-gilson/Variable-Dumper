@@ -411,10 +411,10 @@ class DumpSizeVariableDumperTs : public VariableDumperTs
 		std::string filePath1 = path_ + "vec.csv";
 
 		std::vector<std::vector<int>> vec = { { 1, 2, 3, 4}, {5, 6, 7, 8 } };
-		std::vector<std::vector<int>> testVec = { { 1, 2, 3}, {5, 6, 7 } };
+		std::vector<std::vector<int>> testVec = { { 1, 2, 3}, {5, 6, 7, 8 } };
 
 		DUMP_VAR("vec", vec[0], 3);
-		DUMP_VAR("vec", vec[1], 3);
+		DUMP_VAR("vec", vec[1], 5);
 		DESTROY_DUMPERS();
 
 		assert(isArrayEqualToCSV(testVec, filePath1));
