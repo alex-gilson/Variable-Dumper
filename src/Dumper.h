@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <unordered_map>
 #include <complex>
+#include <optional>
 
 namespace VariableDumper
 {
@@ -63,7 +64,7 @@ public:
 		}
 	}
 	template<typename T>
-	void dump(T& buf, int dumpSize)
+	void dump(T& buf, std::optional<size_t> dumpSize)
 	{
 		currentDimension_++;
 		if (currentDimension_ == 1)
@@ -92,10 +93,10 @@ public:
 
 			if constexpr (is_container_t<typename std::remove_pointer<T>::type>::value)
 			{
-				int i = 0;
+				size_t i = 0;
 				for (auto& val : buf)
 				{
-					bool lastElementOfLine = (i == (buf.size() - 1) || i == (dumpSize - 1));
+					bool lastElementOfLine = (i == (buf.size() - 1) || (dumpSize != std::nullopt && i == (*dumpSize - 1)));
 					dumpVal(val, lastElementOfLine);
 					if (lastElementOfLine)
 					{
@@ -106,9 +107,9 @@ public:
 			}
 			else
 			{
-				for (int i = 0; i < dumpSize; i++)
+				for (size_t i = 0; dumpSize != std::nullopt && i < *dumpSize; i++)
 				{
-					dumpVal(buf[i], i == (dumpSize - 1));
+					dumpVal(buf[i], i == (*dumpSize - 1));
 				}
 			}
 			outFile_ << lineDelimiter_;

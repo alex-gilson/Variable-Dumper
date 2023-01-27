@@ -77,7 +77,7 @@ public:
     void setDumperMaxDumps(const std::string& name, int maxDumps);
     // Dumps the data buffer using the Dumper object with the specified name
     template<typename T>
-    void dump(const std::string& name, T& buf, int size = -1)
+    void dump(const std::string& name, T& buf, std::optional<size_t> size = std::nullopt)
     {
         Dumper* dumper = getDumper(name);
         if (dumper)

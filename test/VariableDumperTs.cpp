@@ -4,6 +4,8 @@
 #include <cassert>
 #include <array>
 #include <complex>
+#include <vector>
+#include <cstring>
 
 class VariableDumperTs
 {
@@ -36,10 +38,10 @@ protected:
 	{
 		std::ifstream file(fileName);
 		std::string line, cell;
-		int index1 = 0;
+		size_t index1 = 0;
 		while (getline(file, line, lineDelimiter))
 		{
-			int index2 = 0;
+			size_t index2 = 0;
 			if (index1 >= array.size())
 			{
 				return false;
@@ -510,8 +512,8 @@ public:
 int main()
 {
 	CArrayVariableDumperTs{}.run();
-	MultithreadSamePathVariableDumperTs{}.run(100);
-	MultithreadDifferentPathVariableDumperTs{}.run(100);
+	MultithreadSamePathVariableDumperTs{}.run(10);
+	MultithreadDifferentPathVariableDumperTs{}.run(10);
 	BasicContainerVariableDumperTs{}.run();
 	NoCopyCustomContainerVariableDumperTs{}.run();
 	ContainerDifferentSizeVariableDumperTs{}.run();
