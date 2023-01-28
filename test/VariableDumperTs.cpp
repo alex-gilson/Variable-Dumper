@@ -1,5 +1,5 @@
 
-#include "DumperManager.h"
+#include "VariableDumper.h"
 #include <filesystem>
 #include <cassert>
 #include <array>
