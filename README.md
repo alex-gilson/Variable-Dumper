@@ -32,7 +32,7 @@ Simply add the Variable-Dumper header file to your code:
 #include "VariableDumper.h"
 ```
 
-Set the path for the dumpers with the command below. Otherwise the current path will be used. The path is set only the dumpers in the current thread.
+Set the path for the dumpers with the command below. Otherwise the current path will be used. The path is set only for the dumpers in the current thread.
 
 ```C++
 SET_DUMPERS_PATH(OUTPUT_PATH);
