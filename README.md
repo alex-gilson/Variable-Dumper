@@ -89,7 +89,7 @@ void runThreadTask(const std::string path, const std::string dumperName, int arr
   // Sets the path of the dumpers associated to this thread
   SET_DUMPERS_PATH(path);
   
-  DUMP_VAR(dumperName, array);
+  DUMP_VAR(dumperName, array, size);
 
   // Destroys the dumpers associated to this thread
   DESTROY_DUMPERS();
