@@ -23,4 +23,5 @@ target_include_directories(VariableDumperTs
 target_link_libraries(VariableDumperTs
                          PRIVATE
                               VariableDumper
+                              pthread
                     )
