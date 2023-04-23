@@ -84,6 +84,10 @@ protected:
 						return false;
 					}
 				}
+				else
+				{
+					(void)precision;
+				}
 				index2++;
 			}
 			if (index2 != array[index1].size())
