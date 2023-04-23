@@ -36,6 +36,7 @@ protected:
 	template<typename T>
 	bool isArrayEqualToCSV(std::vector<std::vector<T>>& array, const std::string& fileName, int precision = 12, char valueDelimiter = ',', char lineDelimiter = '\n')
 	{
+		(void)precision;
 		std::ifstream file(fileName);
 		std::string line, cell;
 		size_t index1 = 0;
@@ -83,10 +84,6 @@ protected:
 					{
 						return false;
 					}
-				}
-				else
-				{
-					(void)precision;
 				}
 				index2++;
 			}
